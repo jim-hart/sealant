@@ -69,20 +69,32 @@ class RegexParameters(object):
 
 
 def _regex_setup(*args, password_length=8):
-    """Function for calling methods in RegexParameters, which builds regex search used to test password stength"""
+    """Function for calling methods in RegexParameters, which builds regex search used to test password strength"""
 
     #default regex_parameters return: ((?=.*\d)(?=.*[A-Z])(?=.*[a-z])) - 1 digit, 1 uppercase, 1 lower case, variable length
     if not args:
-        regex = RegexParameters('digit', 'upper', 'lower')
+        regex_setup = RegexParameters('digit', 'upper', 'lower')
     else:
-        regex = RegexParameters(args)
+        regex_setup = RegexParameters(args)
 
     regex_parameters  = regex_setup.search_parameters
     regex_charset = regex_setup.character_set
-    regex = re.compile(r'(^' + regex_parameters + '{'+ re.escape(str(password_length)) + ',}$)')
+    regex_search = re.compile(r'(^' + regex_parameters + '{'+ re.escape(str(password_length)) + ',}$)')
 
+    return regex_parameters, regex_charset, regex_search
 
-def _check_password_strength(characters, iterations=1000):
+def _iteratative_strength_check(character_set=None, iterations=1000):
+    """Acts as an analysis tool that highlights correlation between password
+    strength, character set variety, and password length.
+
+    The function will randomly generate a passwords of any length from a
+    character set (either preset or user defined), and it will test those
+    passwords against a regex search.
+
+    Each password is generated using the secrets module, which builds a password
+    character by character from the character_set parameter.  This function aims
+    to show how likely a non-pseudo randomized strength of a certain length is
+    likely to meet a set of password requirements."""
 
     characters = list(string.ascii_letters+string.digits)
 
