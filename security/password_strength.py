@@ -16,7 +16,7 @@ class RegexParameters(object):
        self.character_set = self._get_character_set(*args)
 
 
-    def _check_keys(self, *args):
+    def check_keys(self, *args):
         """Exits program if invalid regex search parameter provided. Error
         checking method used over try-except blocks to keep code in other areas
         more concise"""
@@ -31,7 +31,7 @@ class RegexParameters(object):
             sys.exit()
 
 
-    def _build_search(self, *args):
+    def build_search(self, *args):
         """Returns string containing regex search which is built from arguments
         contained in self.search_parameters, which are used as keys in
         regex_parameters"""
@@ -50,7 +50,7 @@ class RegexParameters(object):
         return re.compile(r'(^(' + regex_search + '){'+ re.escape(str(self.password_length)) + ',}$)')
 
 
-    def _get_character_set(self, *args):
+    def get_character_set(self, *args):
         """Returns string which represents character set to be used when
         checking password strengths.  Set is based off arguments passed for
         regex setup"""
@@ -69,7 +69,7 @@ class RegexParameters(object):
         return character_set
 
 
-def _iteratative_strength_check(iterations=1000):
+def iteratative_strength_check(iterations=1000):
     """Acts as an analysis tool that highlights correlation between password
     strength, character set variety, and password length.
 
@@ -97,7 +97,7 @@ def _iteratative_strength_check(iterations=1000):
 
 
 def check_password_strength():
-
+    pass
 
 
 def main():
