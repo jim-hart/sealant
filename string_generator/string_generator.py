@@ -81,7 +81,7 @@ class RandomString(object):
         return self._generate_random_string()
 
     @benchmark
-    def _generate_random_string(self):
+    def generate_random_string(self):
         """Returns a randomized string of either pre-set, or user-defined length.
 
         Args:
@@ -95,7 +95,7 @@ class RandomString(object):
         return "".join([RAND_METHOD.choice(self.char_set) for _ in range(0, self.length)])
 
     @staticmethod
-    def _shuffle_characters(char_set):
+    def shuffle_characters(char_set):
         """Method for shuffling character set between 3-5 times.  Shuffle count
         is randomly chosen."""
 
@@ -107,7 +107,7 @@ class RandomString(object):
         return "".join(char_set)
 
 
-def write_file(file_data, filename):
+def _write_file(file_data, filename):
     """Writes file_data as filename in programs working directory"""
 
     with open(filename, 'w') as f:
@@ -116,7 +116,7 @@ def write_file(file_data, filename):
     print("\nOutput written to: {}".format(os.path.abspath(sys.argv[0])))
 
 
-def get_args():
+def _get_args():
     """Sets up argparse object and returns all arugmnets gathered by the parser."""
 
     parser = argparse.ArgumentParser(
@@ -157,10 +157,10 @@ def get_args():
     return parser.parse_args()
 
 
-def main():
+def _main():
     """Main flow control for program"""
 
-    args = get_args()
+    args = _get_args()
 
     randomized_string = str(
         RandomString(length=args.length, shuffle=args.shuffle, char_set=args.characters))
@@ -168,10 +168,10 @@ def main():
     if args.print_output:
         print("\nOutput:{}\nLength:{}".format(randomized_string, len(randomized_string)))
     if args.file_output:
-        write_file(randomized_string, args.file_output)
+        _write_file(randomized_string, args.file_output)
     if args.copy_output:
         pyperclip.copy(randomized_string)
         print("\nOutput String (length: {}) copied to clipboard".format(len(randomized_string)))
 
 if __name__ == '__main__':
-    main()
+    _main()
