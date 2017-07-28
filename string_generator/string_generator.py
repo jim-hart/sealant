@@ -117,7 +117,7 @@ def get_args():
 
     #length
     parser.add_argument('-l', '--length', type=int, required=True,
-        help="Length of the randomized string")
+        help="Length of the randomized string.")
 
     #character set
     default_characters = string.digits+string.ascii_letters+' '+string.punctuation
@@ -130,11 +130,11 @@ def get_args():
 
     #output-file
     parser.add_argument('-fo', '--file_output', action="store_true", default=None, required=False,
-        help='Write string to .txt file in current directory')
+        help='Write string to .txt file in current directory instead of printing output.')
 
     return parser.parse_args()
 
-
+@benchmark
 def write_file(randomized_string):
     """Writes randomized string to directory of string_generator.py"""
 
@@ -158,7 +158,7 @@ def main():
     if args.file_output:
         write_file(randomized_string)
     else:
-        print("Output: {}\n\nLength: {}\n".format(randomized_string, len(randomized_string)))
+        print("Output:{}\n\nLength: {}\n".format(randomized_string, len(randomized_string)))
 
 if __name__ == '__main__':
     main()
