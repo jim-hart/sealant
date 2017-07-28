@@ -1,4 +1,5 @@
 import random
+import secrets
 import time
 import sys
 import string
@@ -23,13 +24,22 @@ def benchmark(function):
     return function_wrapper
 
 @benchmark
-def shuffle(character_list):
-    """Shuffles character_list 3-5 times.  Shuffle count value is randomly chosen."""
+def _shuffle_characters(char_population):
+    """Function for shuffling character set between 3-5 times.  Shuffle count is
+    randomly chosen.
 
-    shuffle_count = secrets.choice(list(range(3, 6)))
+    Args:
+        char_population (list[str]) -- List of characters used as sample
+                                       population for randomization process
+
+    """
+
+    shuffle_count = secrets.choice(range(3, 6))
+
     for _ in range(0, shuffle_count):
-        random.shuffle(character_list)
-    return character_list
+        random.shuffle(char_population)
+
+    return "".join(char_population)
 
 @benchmark
 def get_random(char_set=None, length=None, shuffle=False, output_file=False):
@@ -38,7 +48,7 @@ def get_random(char_set=None, length=None, shuffle=False, output_file=False):
     Args:
         length (int) -- defines length of randomized string. If not provided,
                         function will default length to the length of
-                        character_list
+                        char_population
         char_set (list[str]) -- list containing single string elements.  If not
                                 provided, ASCII upper, lower, punction, and
                                 whitespace (single) characters will comrpise
@@ -47,22 +57,24 @@ def get_random(char_set=None, length=None, shuffle=False, output_file=False):
         output_file (bool) -- If True, string is output to text file instead of
                               printed to screen. Useful for larger sequences.
     """
-    character_list = char_set or (list(string.ascii_letters+' '+string.punctuation))
-    length = length or len(character_list)
+
+    char_population = char_set or (string.ascii_letters+' '+string.punctuation)
+    length = length or len(char_population)
 
     if shuffle:
-        character_list = shuffle(character_list)
+        char_population = _shuffle_characters(list(char_population))
 
-    randomized_string = "".join([random.choice(character_list) for _ in range(0, length)])
+    randomized_string = "".join([secrets.choice(char_population) for _ in range(0, length)])
 
     if output_file:
         filename = 'randomized_string.txt'
         with open(filename, 'w') as f:
             f.write(randomized_string)
         return "Output string written to: {}".format(os.path.abspath(sys.argv[0]))
-
-    return "Output: {}\nLength: {}\n".format(randomized_string, len(randomized_string))
+    else:
+        return "Output: {}\nLength: {}\n".format(randomized_string, len(randomized_string))
 
 
 if __name__ == '__main__':
-    print(get_random(length=10000, output_file=True))
+    print(get_random(length=100, shuffle=True))
+
