@@ -157,7 +157,7 @@ def _get_args():
     return parser.parse_args()
 
 
-def _main():
+def main():
     """Main flow control for program"""
 
     args = _get_args()
@@ -174,4 +174,4 @@ def _main():
         print("\nOutput String (length: {}) copied to clipboard".format(len(randomized_string)))
 
 if __name__ == '__main__':
-    _main()
+    main()
