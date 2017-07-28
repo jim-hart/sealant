@@ -1,12 +1,13 @@
 from __future__ import print_function
 from functools import wraps
+from datetime import datetime
 
 import os
 import sys
 import random
 import string
 import time
-import datetime
+import pyperclip
 import argparse
 
 # ----------------------------Randomization Method-----------------------------
@@ -44,7 +45,7 @@ def benchmark(function):
 
         start = time.time()
         result = function(*args, **kwargs)
-        print("{:4.3f}s\n".format(time.time()-start))
+        print("{:4.3f}s".format(time.time()-start))
 
         return result
     return function_wrapper
@@ -106,6 +107,15 @@ class RandomString(object):
         return "".join(char_set)
 
 
+def write_file(file_data, filename):
+    """Writes file_data as filename in programs working directory"""
+
+    with open(filename, 'w') as f:
+        f.write(file_data)
+
+    print("\nOutput written to: {}".format(os.path.abspath(sys.argv[0])))
+
+
 def get_args():
     """Sets up argparse object and returns all arugmnets gathered by the parser."""
 
@@ -115,36 +125,36 @@ def get_args():
         epilog="  Default character set includes all printable ASCII characters except:\n"
                "  tab, linefeed, return, formfeed, and vertical tab.")
 
+# ---------------------------------Parameters----------------------------------
     #length
     parser.add_argument('-l', '--length', type=int, required=True,
         help="Length of the randomized string.")
 
     #character set
     default_characters = string.digits+string.ascii_letters+' '+string.punctuation
-    parser.add_argument('-c', '--characters', type=str, default=default_characters, required=False,
+    parser.add_argument('-cs', '--characters', type=str, default=default_characters, required=False,
         help="Overides default character set with the provided string")
 
     #shuffle
-    parser.add_argument('-s', '--shuffle', action="store_true", default=False, required=False,
+    parser.add_argument('-s', '--shuffle', action='store_true', default=False, required=False,
         help="Shuffles character set 3-5 times (randomly chosen) prior to string generation")
 
-    #output-file
-    parser.add_argument('-fo', '--file_output', action="store_true", default=None, required=False,
-        help='Write string to .txt file in current directory instead of printing output.')
+# -----------------------------------Output------------------------------------
+    #terminal output
+    parser.add_argument('-po', '--print_output', action='store_true', default=False, required=False,
+        help='Print randomized string to terminal')
+
+    #copy output
+    parser.add_argument('-co', '--copy_output', action='store_true', default=False, required=False,
+        help='Copy randomized string to clipboard')
+
+    #file output
+    filename = "output_{}.txt".format(datetime.now().strftime('%a%d-%H%M%S'))
+    parser.add_argument('-fo', '--file_output', nargs='?', const=filename, required=False,
+        help='Write randomized string to .txt file in current directory (filename optional)')
+
 
     return parser.parse_args()
-
-@benchmark
-def write_file(randomized_string):
-    """Writes randomized string to directory of string_generator.py"""
-
-    timestamp = datetime.datetime.now().strftime('%c')
-    filename = "{} len({}) - {}.txt".format('randomized_string', len(randomized_string), timestamp)
-
-    with open(filename, 'w') as f:
-        f.write(randomized_string)
-
-    print("Output string written to: {}".format(os.path.abspath(sys.argv[0])))
 
 
 def main():
@@ -155,10 +165,13 @@ def main():
     randomized_string = str(
         RandomString(length=args.length, shuffle=args.shuffle, char_set=args.characters))
 
+    if args.print_output:
+        print("\nOutput:{}\nLength:{}".format(randomized_string, len(randomized_string)))
     if args.file_output:
-        write_file(randomized_string)
-    else:
-        print("Output:{}\n\nLength: {}\n".format(randomized_string, len(randomized_string)))
+        write_file(randomized_string, args.file_output)
+    if args.copy_output:
+        pyperclip.copy(randomized_string)
+        print("\nOutput String (length: {}) copied to clipboard".format(len(randomized_string)))
 
 if __name__ == '__main__':
     main()
