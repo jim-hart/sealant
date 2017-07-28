@@ -6,6 +6,7 @@ import sys
 import random
 import string
 import time
+import datetime
 import argparse
 
 # ----------------------------Randomization Method-----------------------------
@@ -68,8 +69,8 @@ class RandomString(object):
                                randomization process
         """
 
-        self.char_set = char_set or (string.ascii_letters+' '+string.punctuation)
-        self.length = length or len(self.char_set)
+        self.char_set = char_set
+        self.length = length
         self.shuffle = shuffle
 
 
@@ -105,16 +106,57 @@ class RandomString(object):
         return "".join(char_set)
 
 
-def main(output_file=False):
+def get_args():
+    """Sets up argparse object and returns all arugmnets gathered by the parser."""
 
-    randomized_string = str(RandomString(length=100, shuffle=True))
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description="Generate a cryptographically secure randomized string.",
+        epilog="  Default character set includes all printable ASCII characters except:\n"
+               "  tab, linefeed, return, formfeed, and vertical tab.")
 
-    if output_file:
-        filename = 'randomized_string.txt'
-        with open(filename, 'w') as f:
-            f.write(randomized_string)
-        print("Output string written to: {}".format(os.path.abspath(sys.argv[0])))
+    #length
+    parser.add_argument('-l', '--length', type=int, required=True,
+        help="Length of the randomized string")
 
+    #character set
+    default_characters = string.digits+string.ascii_letters+' '+string.punctuation
+    parser.add_argument('-c', '--characters', type=str, default=default_characters, required=False,
+        help="Overides default character set with the provided string")
+
+    #shuffle
+    parser.add_argument('-s', '--shuffle', action="store_true", default=False, required=False,
+        help="Shuffles character set 3-5 times (randomly chosen) prior to string generation")
+
+    #output-file
+    parser.add_argument('-fo', '--file_output', action="store_true", default=None, required=False,
+        help='Write string to .txt file in current directory')
+
+    return parser.parse_args()
+
+
+def write_file(randomized_string):
+    """Writes randomized string to directory of string_generator.py"""
+
+    timestamp = datetime.datetime.now().strftime('%c')
+    filename = "{} len({}) - {}.txt".format('randomized_string', len(randomized_string), timestamp)
+
+    with open(filename, 'w') as f:
+        f.write(randomized_string)
+
+    print("Output string written to: {}".format(os.path.abspath(sys.argv[0])))
+
+
+def main():
+    """Main flow control for program"""
+
+    args = get_args()
+
+    randomized_string = str(
+        RandomString(length=args.length, shuffle=args.shuffle, char_set=args.characters))
+
+    if args.file_output:
+        write_file(randomized_string)
     else:
         print("Output: {}\n\nLength: {}\n".format(randomized_string, len(randomized_string)))
 
