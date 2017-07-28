@@ -3,25 +3,27 @@ import sys
 import string
 import secrets
 import random
+import argparse
 
 #TODO: implement argparse
 
 class RegexParameters(object):
     """Class for assembling custom regex search that defines password requirements"""
 
-    def __init__(self, *args):
+    def __init__(self, *args, password_length=8):
        self._check_keys(*args)
+       self.password_length = password_length
        self.search_parameters = self._build_search(*args)
        self.character_set = self._get_character_set(*args)
 
 
     def _check_keys(self, *args):
         """Exits program if invalid regex search parameter provided. Error
-        checking method used over try|except blocks to keep code in other areas
+        checking method used over try-except blocks to keep code in other areas
         more concise"""
 
-        valid_keys = ('digit', 'upper', 'lower', 'punctuation')
-        invalid_keys = (key for key in args if key not in valid_keys)
+        valid_keys = ('digit', 'upper', 'lower', 'special')
+        invalid_keys = [key for key in args if key not in valid_keys]
 
         if invalid_keys:
             print("INVALID ARGUMENT(S) '{}' -- Only the following arguments are accepted:".format(invalid_keys))
@@ -39,14 +41,14 @@ class RegexParameters(object):
                             'digit': '(?=.*\d)',
                             'upper':'(?=.*[A-Z])',
                             'lower': '(?=.*[a-z])',
-                            'punctuation': '(?=.*[{} ])'.format(string.punctuation)
+                            'special': '(?=.*[{} ])'.format(string.punctuation)
                            }
 
         regex_search = ''
         for parameter in args:
             regex_search += regex_parameters[parameter]
 
-        return '({}).'.format(regex_search)
+        return re.compile(r'(^(' + regex_search + '){'+ re.escape(str(self.password_length)) + ',}$)')
 
 
     def _get_character_set(self, *args):
@@ -58,7 +60,7 @@ class RegexParameters(object):
                                 'digit': string.digits,
                                 'upper': string.ascii_lowercase,
                                 'lower': string.ascii_uppercase,
-                                'punctuation': '(?=.*[{} ])'.format(string.punctuation)
+                                'special': string.punctuation + ' '
                               }
 
         character_set = ''
@@ -68,22 +70,7 @@ class RegexParameters(object):
         return character_set
 
 
-def _regex_setup(*args, password_length=8):
-    """Function for calling methods in RegexParameters, which builds regex search used to test password strength"""
-
-    #default regex_parameters return: ((?=.*\d)(?=.*[A-Z])(?=.*[a-z])) - 1 digit, 1 uppercase, 1 lower case, variable length
-    if not args:
-        regex_setup = RegexParameters('digit', 'upper', 'lower')
-    else:
-        regex_setup = RegexParameters(args)
-
-    regex_parameters  = regex_setup.search_parameters
-    regex_charset = regex_setup.character_set
-    regex_search = re.compile(r'(^' + regex_parameters + '{'+ re.escape(str(password_length)) + ',}$)')
-
-    return regex_parameters, regex_charset, regex_search
-
-def _iteratative_strength_check(character_set=None, iterations=1000):
+def _iteratative_strength_check(*args, iterations=1000):
     """Acts as an analysis tool that highlights correlation between password
     strength, character set variety, and password length.
 
@@ -96,7 +83,7 @@ def _iteratative_strength_check(character_set=None, iterations=1000):
     to show how likely a non-pseudo randomized strength of a certain length is
     likely to meet a set of password requirements."""
 
-    characters = list(string.ascii_letters+string.digits)
+    characters, regex = _get_regex_search(args)
 
     passed, failed = 0, 0
     for _ in range(iterations):
@@ -117,4 +104,6 @@ def main():
     pass
 
 if __name__ == '__main__':
-    main()
+    # Test cases
+    my_regex = RegexParameters('digit', 'upper', 'lower')
+    print(my_regex.search_parameters)
