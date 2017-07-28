@@ -6,6 +6,7 @@ import sys
 import random
 import string
 import time
+import argparse
 
 # ----------------------------Randomization Method-----------------------------
 """This program utilizes SystemRandom, which generates cryptographically random
@@ -31,7 +32,8 @@ except ImportError:
 
 
 def benchmark(function):
-    """Decorator for benchmarking string creation time"""
+    """Decorator for benchmarking string creation time.  Useful for large string
+    blocks"""
     @wraps(function)
     def function_wrapper(*args, **kwargs):
 
@@ -86,27 +88,26 @@ class RandomString(object):
         """
 
         if self.shuffle:
-            self.char_set = _shuffle_characters(list(self.char_set))
+            self.char_set = self._shuffle_characters(list(self.char_set))
 
         return "".join([RAND_METHOD.choice(self.char_set) for _ in range(0, self.length)])
 
-
-    @benchmark
-    def _shuffle_characters(self):
+    @staticmethod
+    def _shuffle_characters(char_set):
         """Method for shuffling character set between 3-5 times.  Shuffle count
         is randomly chosen."""
 
-        shuffle_count = secrets.choice(range(3, 6))
+        shuffle_count = RAND_METHOD.choice(list(range(3,6)))
 
         for _ in range(0, shuffle_count):
-            random.shuffle(self.char_set)
+            random.shuffle(char_set)
 
-        return "".join(self.char_set)
+        return "".join(char_set)
 
 
 def main(output_file=False):
 
-    randomized_string = str(RandomString())
+    randomized_string = str(RandomString(length=100, shuffle=True))
 
     if output_file:
         filename = 'randomized_string.txt'
@@ -115,7 +116,7 @@ def main(output_file=False):
         print("Output string written to: {}".format(os.path.abspath(sys.argv[0])))
 
     else:
-        print("Output: {}\nLength: {}\n".format(randomized_string, len(randomized_string)))
+        print("Output: {}\n\nLength: {}\n".format(randomized_string, len(randomized_string)))
 
 if __name__ == '__main__':
     main()
