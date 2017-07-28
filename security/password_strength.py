@@ -70,7 +70,7 @@ class RegexParameters(object):
         return character_set
 
 
-def _iteratative_strength_check(*args, iterations=1000):
+def _iteratative_strength_check(iterations=1000):
     """Acts as an analysis tool that highlights correlation between password
     strength, character set variety, and password length.
 
@@ -82,8 +82,6 @@ def _iteratative_strength_check(*args, iterations=1000):
     character by character from the character_set parameter.  This function aims
     to show how likely a non-pseudo randomized strength of a certain length is
     likely to meet a set of password requirements."""
-
-    characters, regex = _get_regex_search(args)
 
     passed, failed = 0, 0
     for _ in range(iterations):
