@@ -1,0 +1,27 @@
+name: sealant-2.7
+channels:
+- defaults
+- jim-hart
+- anaconda-fusion
+- omnia
+- r
+dependencies:
+- asn1crypto=0.22.0=py27_0
+- cffi=1.10.0=py27_0
+- cryptography=1.8.1=py27_0
+- enum34=1.1.6=py27_0
+- idna=2.5=py27_0
+- ipaddress=1.0.18=py27_0
+- openssl=1.0.2l=vc9_0
+- packaging=16.8=py27_0
+- pip=9.0.1=py27_1
+- pycparser=2.17=py27_0
+- pyparsing=2.1.4=py27_0
+- python=2.7.13=1
+- setuptools=27.2.0=py27_1
+- six=1.10.0=py27_0
+- vs2008_runtime=9.00.30729.5054=0
+- wheel=0.29.0=py27_0
+- pyperclip=1.5.27=py27_0
+prefix: Q:\Anaconda\envs\sealant-2.7
+
