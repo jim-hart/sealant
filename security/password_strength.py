@@ -2,7 +2,6 @@ import re
 import sys
 import string
 import secrets
-import random
 import argparse
 
 #TODO: implement argparse
@@ -95,6 +94,10 @@ def _iteratative_strength_check(iterations=1000):
     print()
     print('Pass: {}'.format(passed))
     print('Fail: {}'.format(failed))
+
+
+def check_password_strength():
+
 
 
 def main():
