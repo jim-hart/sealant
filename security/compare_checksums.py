@@ -52,7 +52,7 @@ class HashCheck(Files):
         else:
             print("\n ************************{}FAIL: Checksums DO NOT Match{}*************************\n".format(Fore.RED, Style.RESET_ALL))
 
-def main(target, checksum):
+def _main(target, checksum):
     """Prints out comparison of two checksums: one generated from a file, and
     one provided with the file to be checked.  File names are provided via
     command line."""
@@ -62,5 +62,5 @@ def main(target, checksum):
 
 if __name__ == '__main__':
     os.system('cls')
-    main(sys.argv[1], sys.argv[2])
+    _main(sys.argv[1], sys.argv[2])
 
