@@ -7,6 +7,9 @@ import colorama
 from colorama import (Fore, Style)
 colorama.init(convert=True)
 
+# TODO: Implement argparse
+# TODO: Implement hash method choices
+
 class Files:
     """Mixin class for file handling"""
 
