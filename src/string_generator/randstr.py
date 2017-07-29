@@ -24,11 +24,10 @@ a backwards compatible method was included as well."""
 
 try:
     import secrets as RAND_METHOD
-
-    print('System Python Version >= 3.6 | Using secrets module\n')
+    print('\nSystem Python Version >= 3.6 | Using secrets module')
 except ImportError:
     RAND_METHOD = random.SystemRandom()
-    print('System Python Version < 3.6 | Using random.SystemRandom\n')
+    print('\nSystem Python Version < 3.6 | Using random.SystemRandom')
 
 
 # -----------------------------------------------------------------------------
@@ -95,11 +94,9 @@ class RandStrParser(object):
         """Returns parser object used for all argparse arguments"""
 
         return argparse.ArgumentParser(
-            formatter_class=argparse.RawDescriptionHelpFormatter,
             description="Generate a cryptographically secure randomized string.",
-            epilog="""Default character set includes all printable ASCII \
-                   characters except:\n\ttab, linefeed, return, formfeed, and \
-                   vertical tab.""")
+            epilog="""\tDefault character set includes all ASCII upper and lower \
+                   case letters, digits, puncutuation, and a character space.""")
 
     def get_parser_args(self):
         """Calls methods that add arguments to parser objects, after which, it
@@ -116,7 +113,7 @@ class RandStrParser(object):
 
         # length
         self.parser.add_argument(
-            'l', 'length', type=int, required=True,
+            '-l', '--length', type=int, required=True,
             help="Length of the randomized string")
 
         # character set
@@ -164,7 +161,7 @@ def _write_file(file_data, filename):
     with open(filename, 'w') as f:
         f.write(file_data)
 
-    print("\nOutput written to: {}".format(os.path.abspath(sys.argv[0])))
+    print("Output written to: {}\n".format(os.path.abspath(sys.argv[0])))
 
 
 def main():
@@ -174,19 +171,26 @@ def main():
     randomized_string = str(
         RandomString(length=parser_args.length, shuffle=parser_args.shuffle,
                      char_set=parser_args.characters))
+ 
+    #Prinout verifies if string is desired length
+    print("\n{} len(randomized_string):{} {}".format(
+        '-------------------------', len(randomized_string),
+        '-------------------------\n'))
 
-    if parser_args.print_output:
-        print("\nOutput:{}\nLength:{}".format(
-            randomized_string, len(randomized_string)))
+    if parser_args.print:
+        print("Output:{}\n".format(randomized_string))
 
-    if parser_args.file_output:
+    if parser_args.file:
         _write_file(randomized_string, parser_args.file_output)
 
-    if parser_args.copy_output:
+    if parser_args.copy:
         pyperclip.copy(randomized_string)
-        print("\nOutput String (length: {}) copied to clipboard".format(
-            len(randomized_string)))
+        print("Output String copied to clipboard\n")
 
+#  END ------------------------------------
+    print("{} END {}".format(
+        '------------------------------------',
+        '------------------------------------'))
 
 if __name__ == '__main__':
     main()
