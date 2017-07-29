@@ -26,7 +26,6 @@ a backwards compatible method was included as well."""
 
 try:
     import secrets as RAND_METHOD
-
     print('System Python Version >= 3.6 | Using secrets module\n')
 except ImportError:
     RAND_METHOD = random.SystemRandom()
@@ -34,26 +33,6 @@ except ImportError:
 
 
 # -----------------------------------------------------------------------------
-
-
-def benchmark(func):
-    """Decorator for benchmarking string creation time.  Useful for large string
-    blocks"""
-
-    @wraps(func)
-    def function_wrapper(*args, **kwargs):
-        print("Function : {}()".format(func.__name__))
-        print("Benchmark: ", end='')
-        sys.stdout.flush()
-
-        start = time.time()
-        result = func(*args, **kwargs)
-        print("{:4.3f}s".format(time.time() - start))
-
-        return result
-
-    return function_wrapper
-
 
 class RandomString(object):
     """Class for generating random strings based on default, or user-defined
@@ -156,14 +135,15 @@ def main():
     """Main flow control for program"""
 
     args = _get_args()
-
     randomized_string = str(
         RandomString(length=args.length, shuffle=args.shuffle, char_set=args.characters))
 
     if args.print_output:
         print("\nOutput:{}\nLength:{}".format(randomized_string, len(randomized_string)))
+
     if args.file_output:
         _write_file(randomized_string, args.file_output)
+
     if args.copy_output:
         pyperclip.copy(randomized_string)
         print("\nOutput String (length: {}) copied to clipboard".format(len(randomized_string)))
