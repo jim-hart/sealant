@@ -8,12 +8,12 @@ import random
 import string
 import time
 import pyperclip
-import argparse
+import argparse  # Not Available for Python 3.0 and 3.1
 
 # ----------------------------Randomization Method-----------------------------
 """This program utilizes SystemRandom, which generates cryptographically random
 data from an OS-specific source. Windows uses CryptGenRandom() while *nix should
-use /dev/urandom.  If neither is avaibable, the program won't work.
+use /dev/urandom.  If neither is available, the program won't work.
 
 The module used to invoke SystemRandom depends on the version of Python used to
 run this file.  3.6+ will use the secrets module while anything lower uses
@@ -26,28 +26,32 @@ a backwards compatible method was included as well."""
 
 try:
     import secrets as RAND_METHOD
+
     print('System Python Version >= 3.6 | Using secrets module\n')
 except ImportError:
     RAND_METHOD = random.SystemRandom()
     print('System Python Version < 3.6 | Using random.SystemRandom\n')
+
+
 # -----------------------------------------------------------------------------
 
 
-def benchmark(function):
+def benchmark(func):
     """Decorator for benchmarking string creation time.  Useful for large string
     blocks"""
-    @wraps(function)
-    def function_wrapper(*args, **kwargs):
 
-        print("Function : {}()".format(function.__name__))
+    @wraps(func)
+    def function_wrapper(*args, **kwargs):
+        print("Function : {}()".format(func.__name__))
         print("Benchmark: ", end='')
         sys.stdout.flush()
 
         start = time.time()
-        result = function(*args, **kwargs)
-        print("{:4.3f}s".format(time.time()-start))
+        result = func(*args, **kwargs)
+        print("{:4.3f}s".format(time.time() - start))
 
         return result
+
     return function_wrapper
 
 
@@ -55,42 +59,34 @@ class RandomString(object):
     """Class for generating random strings based on default, or user-defined
     parameters"""
 
-    def __init__(self, char_set=None, length=None, shuffle=False):
+    def __init__(self, length, shuffle, char_set):
         """
         Args:
-        length (int) -- defines length of randomized string. If not provided,
-                        function will default length to the length of
-                        self.char_set
-        char_set (list[str]) -- list containing single string elements.  If not
-                                provided, ASCII upper, lower, punctuation, and
-                                whitespace (single) characters will comprise
-                                sample population for the randomization process
-        shuffle (bool) -- If true, char_set is shuffled via
-                               _shuffle_characters() method prior to
-                               randomization process
+            length (int)  -- Defines length of randomized string.
+            shuffle (bool)-- If true, char_set is shuffled via
+                             self.shuffle_characters() method prior to
+                             randomization process.
+            char_set (str)-- String of characters to be used as sample
+                             population for randomization process.  Defaults to
+                             ASCII character space, uppercase, lowercase, and
+                             punctuation characters if no argument provided.
         """
 
-        self.char_set = char_set
         self.length = length
         self.shuffle = shuffle
-
+        self.char_set = char_set
 
     def __repr__(self):
         """Returns object instance itself as representation of randomized string"""
 
-        return self._generate_random_string()
+        return self.generate_random_string()
 
     @benchmark
     def generate_random_string(self):
-        """Returns a randomized string of either pre-set, or user-defined length.
-
-        Args:
-            shuffle (bool) -- If True, character list is sent to _shuffle()
-            function
-        """
+        """Returns a randomized string of either preset, or user-defined length."""
 
         if self.shuffle:
-            self.char_set = self._shuffle_characters(list(self.char_set))
+            self.char_set = self.shuffle_characters(list(self.char_set))
 
         return "".join([RAND_METHOD.choice(self.char_set) for _ in range(0, self.length)])
 
@@ -99,7 +95,7 @@ class RandomString(object):
         """Method for shuffling character set between 3-5 times.  Shuffle count
         is randomly chosen."""
 
-        shuffle_count = RAND_METHOD.choice(list(range(3,6)))
+        shuffle_count = RAND_METHOD.choice(list(range(3, 6)))
 
         for _ in range(0, shuffle_count):
             random.shuffle(char_set)
@@ -117,7 +113,7 @@ def _write_file(file_data, filename):
 
 
 def _get_args():
-    """Sets up argparse object and returns all arugmnets gathered by the parser."""
+    """Sets up argparse object and returns all arguments gathered by the parser."""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -125,34 +121,33 @@ def _get_args():
         epilog="  Default character set includes all printable ASCII characters except:\n"
                "  tab, linefeed, return, formfeed, and vertical tab.")
 
-# ---------------------------------Parameters----------------------------------
-    #length
-    parser.add_argument('-l', '--length', type=int, required=True,
-        help="Length of the randomized string.")
+    # -------------------------------Parameters--------------------------------
+    # length
+    parser.add_argument('l', 'length', type=int, required=True,
+                        help="Length of the randomized string")
 
-    #character set
-    default_characters = string.digits+string.ascii_letters+' '+string.punctuation
-    parser.add_argument('-cs', '--characters', type=str, default=default_characters, required=False,
-        help="Overides default character set with the provided string")
+    # character set
+    default_charset = string.digits + string.ascii_letters + ' ' + string.punctuation
+    parser.add_argument('-cs', '--characters', type=str, default=default_charset,
+                        help="Overrides default character set with characters in the provided string")
 
-    #shuffle
-    parser.add_argument('-s', '--shuffle', action='store_true', default=False, required=False,
-        help="Shuffles character set 3-5 times (randomly chosen) prior to string generation")
+    # shuffle
+    parser.add_argument('-s', '--shuffle', action='store_true',
+                        help="Pre-shuffle character positions in set 3-5 times (randomly chosen)")
 
-# -----------------------------------Output------------------------------------
-    #terminal output
-    parser.add_argument('-po', '--print_output', action='store_true', default=False, required=False,
-        help='Print randomized string to terminal')
+    # ---------------------------------Output----------------------------------
+    # terminal output
+    parser.add_argument('-po', '--print_output', action='store_true',
+                        help='Print randomized string to terminal')
 
-    #copy output
-    parser.add_argument('-co', '--copy_output', action='store_true', default=False, required=False,
-        help='Copy randomized string to clipboard')
+    # copy output
+    parser.add_argument('-co', '--copy_output', action='store_true',
+                        help='Copy randomized string to clipboard')
 
-    #file output
+    # file output
     filename = "output_{}.txt".format(datetime.now().strftime('%a%d-%H%M%S'))
-    parser.add_argument('-fo', '--file_output', nargs='?', const=filename, required=False,
-        help='Write randomized string to .txt file in current directory (filename optional)')
-
+    parser.add_argument('-fo', '--file_output', nargs='?', const=filename,
+                        help='Write randomized string to .txt file in cwd (filename optional)')
 
     return parser.parse_args()
 
@@ -172,6 +167,7 @@ def main():
     if args.copy_output:
         pyperclip.copy(randomized_string)
         print("\nOutput String (length: {}) copied to clipboard".format(len(randomized_string)))
+
 
 if __name__ == '__main__':
     main()
