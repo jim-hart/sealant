@@ -172,7 +172,7 @@ def main():
         RandomString(length=parser_args.length, shuffle=parser_args.shuffle,
                      char_set=parser_args.characters))
  
-    #Prinout verifies if string is desired length
+    # Printout verifies if string is desired length
     print("\n{} len(randomized_string):{} {}".format(
         '-------------------------', len(randomized_string),
         '-------------------------\n'))
