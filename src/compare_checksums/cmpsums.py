@@ -64,6 +64,6 @@ def main(target, checksum):
     my_hash.compare_checksums()
 
 if __name__ == '__main__':
-    os.system('cls')
-    main(sys.argv[1], sys.argv[2])
+    #Test cases
+    pass
 
