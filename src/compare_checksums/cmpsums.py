@@ -1,4 +1,5 @@
 import hashlib
+import ntpath
 import sys
 import os
 
@@ -12,26 +13,20 @@ colorama.init(convert=True)
 # TODO: Implement argparse
 # TODO: Implement hash method choices
 
-class Files:
-    """Mixin class for file handling"""
-    @staticmethod
-    def read_file(filename, mode='r'):
-        filename = os.path.abspath(filename)
-        with open(filename, mode) as f:
-            return f.read()
 
-
-class HashCheck(Files):
+class HashCheck(object):
     """Class for comparing a provided checksum file against the locally
     generated checksum of that file"""
 
-    def __init__(self, target_file=None, checksum_file=None):
+    def __init__(self, target_file, checksum_file=None):
         self.target_file = target_file
         self.checksum_file = checksum_file
 
-    def read_checksum(self):
-        """Reads the provided checksum file"""
-        return self.read_file(self.checksum_file)[0:64]
+    def read_checksum_file(self):
+        """Returns contents of provided checksum file (if one is provided)"""
+
+        with open(self.checksum_file, 'r') as f:
+            return f.read().split(' ')[0]
 
     def generate_checksum(self):
         """Returns hexadecimal digest generated from self.target_file"""
@@ -53,7 +48,7 @@ class HashCheck(Files):
 
         print("\n --------------------------------Comparing Now--------------------------------\n")
 
-        provided_checksum = self.read_checksum()
+        provided_checksum = self.read_checksum_file()
         generated_checksum = self.generate_checksum()
         print(" Provided  : ", provided_checksum)
         print(" Generated : ", generated_checksum)
