@@ -1,7 +1,7 @@
 import hashlib
-import ntpath
 import sys
 import os
+import hmac  # Python 2.7 and 3.3+
 
 # terminal colors
 import colorama
@@ -18,17 +18,17 @@ class HashCheck(object):
     """Class for comparing a provided checksum file against the locally
     generated checksum of that file"""
 
-    def __init__(self, target_file, checksum_file=None):
+    def __init__(self, target_file, digest_file=None):
         self.target_file = target_file
-        self.checksum_file = checksum_file
+        self.digest_file = digest_file
 
-    def read_checksum_file(self):
+    def read_digest_file(self):
         """Returns contents of provided checksum file (if one is provided)"""
 
-        with open(self.checksum_file, 'r') as f:
+        with open(self.digest_file, 'r') as f:
             return f.read().split(' ')[0]
 
-    def generate_checksum(self):
+    def generate_digest(self):
         """Returns hexadecimal digest generated from self.target_file"""
 
         # File is read in 4096 byte blocks to cut down on memory usage
@@ -43,32 +43,31 @@ class HashCheck(object):
 
         return hash_digest.hexdigest()
 
-    def compare_checksums(self):
-        """Compares and prints out results of generated and provided checksums"""
+    def compare_digests(self):
+        """Compares and prints out results of generated and provided hash digest"""
 
         print("\n --------------------------------Comparing Now--------------------------------\n")
 
-        provided_checksum = self.read_checksum_file()
-        generated_checksum = self.generate_checksum()
-        print(" Provided  : ", provided_checksum)
-        print(" Generated : ", generated_checksum)
+        provided_digest = self.read_digest_file()
+        generated_digest = self.generate_digest()
+        print(" Provided  : ", provided_digest)
+        print(" Generated : ", generated_digest)
 
-        if provided_checksum == generated_checksum:
-            print("\n --------------------------{}SUCCESS: Checksums Match{}---------------------------\n".format(
+        if hmac.compare_digest(provided_digest, generated_digest):
+            print("\n ---------------------------{}SUCCESS: Digests Match{}----------------------------\n".format(
                 Fore.CYAN, Style.RESET_ALL))
         else:
-            print("\n ************************{}FAIL: Checksums DO NOT Match{}*************************\n".format(
+            print("\n ************************{}FAIL: Digests DO NOT Match{}*************************\n".format(
                 Fore.RED, Style.RESET_ALL))
 
 
-def main(target, checksum):
-    """Prints out comparison of two checksums: one generated from a file, and
+def main(target_file, digest_file):
+    """Prints out comparison of two hash digests: one generated from a file, and
     one provided with the file to be checked.  File names are provided via
     command line."""
 
-    my_hash = HashCheck(target_file=target, checksum_file=checksum)
-    my_hash.compare_checksums()
-
+    my_hash = HashCheck(target_file=target_file, digest_file=digest_file)
+    my_hash.compare_digests()
 
 if __name__ == '__main__':
     # Test cases
