@@ -2,10 +2,12 @@ import hashlib
 import sys
 import os
 
-#terminal colors
+# terminal colors
 import colorama
 from colorama import (Fore, Style)
+
 colorama.init(convert=True)
+
 
 # TODO: Implement argparse
 # TODO: Implement hash method choices
@@ -18,10 +20,10 @@ class Files:
 
     @staticmethod
     def read_file(filename, mode='r'):
-
         filename = os.path.abspath(filename)
         with open(filename, mode) as f:
             return f.read()
+
 
 class HashCheck(Files):
     """Class for comparing a provided checksum file against the locally
@@ -31,15 +33,24 @@ class HashCheck(Files):
         self.target_file = target_file
         self.checksum_file = checksum_file
 
+    def read_checksum(self):
+        """Reads the provided checksum file"""
+        return self.read_file(self.checksum_file)[0:64]
+
     def generate_checksums(self):
-        """Returns tuple containing the generated SHA256 checksum for
-        self.target_file, and the SHA256 checksum provided with the
-        target_file"""
+        """Returns hexadecimal digest generated from self.target_file"""
 
-        provided_checksum = self.read_file(self.checksum_file)[0:64]
-        generated_checksum = hashlib.sha256(self.read_file(self.target_file, 'rb')).hexdigest()
+        #File is read in 4096 byte blocks to cut down on memory usage
+        blocks = (os.path.getsize(self.target_file) // 4096) + 1
+        hash_digest = hashlib.sha256()
 
-        return (provided_checksum, generated_checksum)
+        with open(self.target_file, 'rb') as f:
+            #Blocks are read via generator expression for improved performance
+            generator = (f.read(4096) for _ in blocks)
+            for data in generator:
+                hash_digest.update(data)
+
+        return hash_digest.hexdigest()
 
     def compare_checksums(self):
         """Compares and prints out results of generated and provided checksums"""
@@ -51,9 +62,12 @@ class HashCheck(Files):
         print(" Generated : ", checksums[1])
 
         if checksums[0] == checksums[1]:
-            print("\n --------------------------{}SUCCESS: Checksums Match{}---------------------------\n".format(Fore.CYAN, Style.RESET_ALL))
+            print("\n --------------------------{}SUCCESS: Checksums Match{}---------------------------\n".format(
+                Fore.CYAN, Style.RESET_ALL))
         else:
-            print("\n ************************{}FAIL: Checksums DO NOT Match{}*************************\n".format(Fore.RED, Style.RESET_ALL))
+            print("\n ************************{}FAIL: Checksums DO NOT Match{}*************************\n".format(
+                Fore.RED, Style.RESET_ALL))
+
 
 def main(target, checksum):
     """Prints out comparison of two checksums: one generated from a file, and
@@ -63,7 +77,8 @@ def main(target, checksum):
     my_hash = HashCheck(target_file=target, checksum_file=checksum)
     my_hash.compare_checksums()
 
-if __name__ == '__main__':
-    #Test cases
-    pass
 
+if __name__ == '__main__':
+    # Test cases
+    os.system('cls')
+    main(sys.argv[1], sys.argv[2])
