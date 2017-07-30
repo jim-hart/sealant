@@ -14,10 +14,6 @@ colorama.init(convert=True)
 
 class Files:
     """Mixin class for file handling"""
-
-    def __init__(self):
-        pass
-
     @staticmethod
     def read_file(filename, mode='r'):
         filename = os.path.abspath(filename)
@@ -37,16 +33,16 @@ class HashCheck(Files):
         """Reads the provided checksum file"""
         return self.read_file(self.checksum_file)[0:64]
 
-    def generate_checksums(self):
+    def generate_checksum(self):
         """Returns hexadecimal digest generated from self.target_file"""
 
-        #File is read in 4096 byte blocks to cut down on memory usage
+        # File is read in 4096 byte blocks to cut down on memory usage
         blocks = (os.path.getsize(self.target_file) // 4096) + 1
         hash_digest = hashlib.sha256()
 
         with open(self.target_file, 'rb') as f:
-            #Blocks are read via generator expression for improved performance
-            generator = (f.read(4096) for _ in blocks)
+            # Blocks are read via generator expression for improved performance
+            generator = (f.read(4096) for _ in range(blocks))
             for data in generator:
                 hash_digest.update(data)
 
@@ -57,11 +53,12 @@ class HashCheck(Files):
 
         print("\n --------------------------------Comparing Now--------------------------------\n")
 
-        checksums = self.generate_checksums()
-        print(" Provided  : ", checksums[0])
-        print(" Generated : ", checksums[1])
+        provided_checksum = self.read_checksum()
+        generated_checksum = self.generate_checksum()
+        print(" Provided  : ", provided_checksum)
+        print(" Generated : ", generated_checksum)
 
-        if checksums[0] == checksums[1]:
+        if provided_checksum == generated_checksum:
             print("\n --------------------------{}SUCCESS: Checksums Match{}---------------------------\n".format(
                 Fore.CYAN, Style.RESET_ALL))
         else:
