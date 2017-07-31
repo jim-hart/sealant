@@ -61,29 +61,53 @@ class HashCheck(object):
             print("\n ************************{}FAIL: Digests DO NOT Match{}*************************\n".format(
                 Fore.RED, Style.RESET_ALL))
 
+
 class HashChkParser(object):
-
     def __init__(self):
-        self.parser = self.get_parser()
+        self.parser = self.create_parser()
+        self.args = get_parser_args()
 
-
-    def create_parser(self):
+    @staticmethod
+    def create_parser():
         """Returns parser object used for all argparse arguments"""
 
         return argparse.ArgumentParser(
-            description="Generate and compare hash digests")
+            description="Generate and compare hash digests", 
+            epilog="""Hashchk requires two hash digests from any source.  It \
+                   can generate digests from a file, read digests stored in \
+                   .txt files, or be provided a digest directly through \
+                   standard input.  Any combination of any two inputs (even \
+                   the same input type twice) will be accepted.""")
 
+    def get_parser_args():
+        """Calls method responsbile for adding parser arguments, after which,
+        arguments retrieved through parser are returned"""
+
+        self.add_arguments()
+
+        return self.parse_args()
 
     def add_arguments(self):
         """Organizational method for holding arguments added to self.parser
         object."""
 
+        self.parser.add_argument(
+            '-bin', '--binary-file', action="append", nargs=2,
+            metavar=('binary_file_1', 'binary_file_2'),
+            help="Generate a hash digest of the following file")
 
-        self.parser.add_argument('-t', '--target', required=True,
-            help="Filename of the file that needs to be verified")
+        self.parser.add_argument(
+            '-txt', '--text-file', action="append", nargs=2,
+            metavar=('text_file_1', 'text_file_2'),
+            help="Read the digest stored in the following .txt file")
 
-        self.parser.add_argument('-fd', '--fdigest',
-            help="Filename containing a generated digest.  ")
+        self.parser.add_argument(
+            '-stdin', '--standard-input', action="append", nargs=2,
+            metavar=('input_string_1', 'input_string_2'),
+            help="Take the following string as a hash digest")
+
+
+
 
 def main(target_file, digest_file):
     """Prints out comparison of two hash digests: one generated from a file, and
@@ -92,6 +116,7 @@ def main(target_file, digest_file):
 
     my_hash = HashCheck(target_file=target_file, digest_file=digest_file)
     my_hash.compare_digests()
+
 
 if __name__ == '__main__':
     # Test cases
