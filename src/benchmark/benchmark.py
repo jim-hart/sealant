@@ -1,3 +1,9 @@
+from __future__ import print_function
+from functools import wraps
+
+import time
+import sys
+
 """Simple bechmark decorator to be used as needed"""
 
 def benchmark(function_):
