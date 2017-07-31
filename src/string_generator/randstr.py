@@ -1,10 +1,11 @@
 from __future__ import print_function
-from datetime import datetime
+from six.moves import range
 
 import os
 import sys
 import random
 import string
+import datetime
 import pyperclip
 import argparse  # Not Available for Python 3.0 and 3.1
 
