@@ -11,10 +11,8 @@ import sys
 import os
 import hmac  # Python 2.7 and 3.3+
 
-
-# TODO: Implement argparse
 # TODO: Implement hash method choices
-
+# TODO: Repent for not adding docstrings, then add the docstinrgs.  
 
 class HashCheck(object):
     """Class for comparing a provided checksum file against the locally
