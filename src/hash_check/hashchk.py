@@ -1,17 +1,15 @@
+# ----------------------------Compatibility Imports----------------------------
 from __future__ import print_function
+from builtins import dict
 from six.moves import range
+# -----------------------------------------------------------------------------
 
 import hashlib
+import argparse
+import colorama
 import sys
 import os
 import hmac  # Python 2.7 and 3.3+
-import argparse
-
-# terminal colors
-import colorama
-from colorama import (Fore, Style)
-
-colorama.init(convert=True)
 
 
 # TODO: Implement argparse
@@ -59,10 +57,10 @@ class HashCheck(object):
 
         if hmac.compare_digest(provided_digest, generated_digest):
             print("\n ---------------------------{}SUCCESS: Digests Match{}----------------------------\n".format(
-                Fore.CYAN, Style.RESET_ALL))
+                colorama.Fore.CYAN, colorama.Style.RESET_ALL))
         else:
             print("\n ************************{}FAIL: Digests DO NOT Match{}*************************\n".format(
-                Fore.RED, Style.RESET_ALL))
+                colorama.Fore.RED, colorama.Style.RESET_ALL))
 
 
 class HashChkParser(object):
@@ -113,6 +111,8 @@ def main():
     """Prints out comparison of two hash digests: one generated from a file, and
     one provided with the file to be checked.  File names are provided via
     command line."""
+
+    colorama.init(convert=True)
 
     parser_args = HashChkParser().args
     print(parser_args)
