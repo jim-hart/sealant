@@ -20,42 +20,66 @@ class HashCheck(object):
     """Class for comparing a provided checksum file against the locally
     generated checksum of that file"""
 
-    def __init__(self, target_file, digest_file=None):
-        self.target_file = target_file
-        self.digest_file = digest_file
+    def __init__(self, digest_sources):
+        self.digest_sources = digest_sources
+        self.digests = self.process_digest_sources()
 
-    def read_digest_file(self):
+
+    def process_digest_sources(self):
+        """Returns list of tuples containing hash digests from
+        self.digest_sources.  If digest is either generated from, or provided
+        through a file filename, source is sent to approriate file handling
+        method first."""
+
+        digests = []
+        file_sources = {'txt': self.read_digest_file, 
+                        'bin': self.generate_digest}
+
+        for attr, values in self.digest_sources.items():
+            while values:
+                value = values.pop(0)
+                if attr in file_sources.keys():
+                    digests.append((attr, file_sources[attr](value)))                
+                else:
+                    digests.append((attr, value))
+
+        return digests
+
+    @staticmethod
+    def read_digest_file(filename):
         """Returns contents of provided checksum file (if one is provided)"""
 
-        with open(self.digest_file, 'r') as f:
+        with open(filename, 'r') as f:
             return f.read().split(' ')[0]
 
-    def generate_digest(self):
-        """Returns hexadecimal digest generated from self.target_file"""
+    @staticmethod
+    def generate_digest(filename):
+        """Returns hexadecimal digest generated from filename"""
 
         # File is read in 4096 byte blocks to cut down on memory usage
-        blocks = (os.path.getsize(self.target_file) // 4096) + 1
+        blocks = (os.path.getsize(filename) // 4096) + 1
         hash_digest = hashlib.sha256()
 
-        with open(self.target_file, 'rb') as f:
+        with open(filename, 'rb') as f:
             # Blocks are read via generator expression for improved performance
             generator = (f.read(4096) for _ in range(blocks))
             for data in generator:
                 hash_digest.update(data)
 
         return hash_digest.hexdigest()
+        
 
     def compare_digests(self):
         """Compares and prints out results of generated and provided hash digest"""
 
         print("\n --------------------------------Comparing Now--------------------------------\n")
 
-        provided_digest = self.read_digest_file()
-        generated_digest = self.generate_digest()
-        print(" Provided  : ", provided_digest)
-        print(" Generated : ", generated_digest)
+        digest_1, digest_2 = self.digests[0][1], self.digests[1][1]
 
-        if hmac.compare_digest(provided_digest, generated_digest):
+        for digest in self.digests:
+            print(" {}:{}".format(digest[0].upper(), digest[1]))
+
+        if hmac.compare_digest(digest_1, digest_2):
             print("\n ---------------------------{}SUCCESS: Digests Match{}----------------------------\n".format(
                 colorama.Fore.CYAN, colorama.Style.RESET_ALL))
         else:
@@ -82,12 +106,17 @@ class HashChkParser(object):
 
     def get_parser_args(self):
         """Calls method responsible for adding parser arguments, after which,
-        arguments retrieved through parser are returned as a dictionary"""
+        non-emtpy arguments retrieved through parser are returned as a dictionary"""
 
         self.add_arguments()
+        parsed_args = vars(self.parser.parse_args())        
         
-        parsed_args = vars(self.parser.parse_args())
-        parsed_args = [{k:v} for k, v in parsed_args.items() if value]
+        # Check that only 2 digest sources provided
+        if sum(len(values) for values in parsed_args.values() if values) != 2:
+            print("ERROR: hashchk uses 2 and ONLY 2 digest sources")
+            sys.exit("""Check that digest sources meet this requirement.""")
+        else:
+            return parsed_args
 
 
     def add_arguments(self):
@@ -95,15 +124,15 @@ class HashChkParser(object):
         object."""
 
         self.parser.add_argument(
-            '-bin', '--binary-file', action="append", metavar='FILENAME',
+            '-bin', '--binary-file', action="append", metavar='FILENAME', dest='bin',
             help="Generate a hash digest of the following file")
 
         self.parser.add_argument(
-            '-txt', '--text-file', action="append", metavar='FILENAME',
+            '-txt', '--text-file', action="append", metavar='FILENAME', dest='txt', 
             help="Read the digest stored in the following .txt file")
 
         self.parser.add_argument(
-            '-stdin', '--standard-input', action="append", metavar='STRING',
+            '-stdin', '--standard-input', action="append", metavar='STRING', dest='stdin', 
             help="Take the following string as a hash digest")
 
 
@@ -112,16 +141,12 @@ def main():
     one provided with the file to be checked.  File names are provided via
     command line."""
 
+    os.system('cls')
     colorama.init(convert=True)
 
-    parser_args = HashChkParser().args
-    print(parser_args)
-    sys.exit()
+    parsed_args = HashChkParser().args
+    HashCheck(parsed_args).compare_digests()
 
-    # my_hash = HashCheck(target_file=target_file, digest_file=digest_file)
-    # my_hash.compare_digests()
-
-
+    
 if __name__ == '__main__':
-    # Test cases
     main()
