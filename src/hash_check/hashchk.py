@@ -73,7 +73,17 @@ class HashChkParser(object):
         return argparse.ArgumentParser(
             description="Generate and compare hash digests")
 
-    
+
+    def add_arguments(self):
+        """Organizational method for holding arguments added to self.parser
+        object."""
+
+
+        self.parser.add_argument('-t', '--target', required=True,
+            help="Filename of the file that needs to be verified")
+
+        self.parser.add_argument('-fd', '--fdigest',
+            help="Filename containing a generated digest.  ")
 
 def main(target_file, digest_file):
     """Prints out comparison of two hash digests: one generated from a file, and
