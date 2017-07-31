@@ -148,7 +148,7 @@ class RandStrParser(object):
 
         # file output
         filename = "output_str_{}.txt".format(
-            datetime.now().strftime('%a%d-%H%M%S'))
+            datetime.datetime.now().strftime('%a%d-%H%M%S'))
 
         self.parser.add_argument(
             '-f', '--file', nargs='?', const=filename,
