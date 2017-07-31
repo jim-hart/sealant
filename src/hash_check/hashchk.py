@@ -81,26 +81,28 @@ class HashChkParser(object):
 
     def get_parser_args(self):
         """Calls method responsible for adding parser arguments, after which,
-        arguments retrieved through parser are returned"""
+        arguments retrieved through parser are returned as a dictionary"""
 
         self.add_arguments()
+        
+        parsed_args = vars(self.parser.parse_args())
+        parsed_args = [{k:v} for k, v in parsed_args.items() if value]
 
-        return self.parser.parse_args()
 
     def add_arguments(self):
         """Organizational method for holding arguments added to self.parser
         object."""
 
         self.parser.add_argument(
-            '-bin', '--binary-file', action="append", metavar='binary_files',
+            '-bin', '--binary-file', action="append", metavar='FILENAME',
             help="Generate a hash digest of the following file")
 
         self.parser.add_argument(
-            '-txt', '--text-file', action="append", metavar='text_files',
+            '-txt', '--text-file', action="append", metavar='FILENAME',
             help="Read the digest stored in the following .txt file")
 
         self.parser.add_argument(
-            '-stdin', '--standard-input', action="append", metavar='input_str',
+            '-stdin', '--standard-input', action="append", metavar='STRING',
             help="Take the following string as a hash digest")
 
 
