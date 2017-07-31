@@ -65,7 +65,7 @@ class HashCheck(object):
 class HashChkParser(object):
     def __init__(self):
         self.parser = self.create_parser()
-        self.args = get_parser_args()
+        self.args = self.get_parser_args()
 
     @staticmethod
     def create_parser():
@@ -79,46 +79,44 @@ class HashChkParser(object):
                    standard input.  Any combination of any two inputs (even \
                    the same input type twice) will be accepted.""")
 
-    def get_parser_args():
-        """Calls method responsbile for adding parser arguments, after which,
+    def get_parser_args(self):
+        """Calls method responsible for adding parser arguments, after which,
         arguments retrieved through parser are returned"""
 
         self.add_arguments()
 
-        return self.parse_args()
+        return self.parser.parse_args()
 
     def add_arguments(self):
         """Organizational method for holding arguments added to self.parser
         object."""
 
         self.parser.add_argument(
-            '-bin', '--binary-file', action="append", nargs=2,
-            metavar=('binary_file_1', 'binary_file_2'),
+            '-bin', '--binary-file', action="append", metavar='binary_files',
             help="Generate a hash digest of the following file")
 
         self.parser.add_argument(
-            '-txt', '--text-file', action="append", nargs=2,
-            metavar=('text_file_1', 'text_file_2'),
+            '-txt', '--text-file', action="append", metavar='text_files',
             help="Read the digest stored in the following .txt file")
 
         self.parser.add_argument(
-            '-stdin', '--standard-input', action="append", nargs=2,
-            metavar=('input_string_1', 'input_string_2'),
+            '-stdin', '--standard-input', action="append", metavar='input_str',
             help="Take the following string as a hash digest")
 
 
-
-
-def main(target_file, digest_file):
+def main():
     """Prints out comparison of two hash digests: one generated from a file, and
     one provided with the file to be checked.  File names are provided via
     command line."""
 
-    my_hash = HashCheck(target_file=target_file, digest_file=digest_file)
-    my_hash.compare_digests()
+    parser_args = HashChkParser().args
+    print(parser_args)
+    sys.exit()
+
+    # my_hash = HashCheck(target_file=target_file, digest_file=digest_file)
+    # my_hash.compare_digests()
 
 
 if __name__ == '__main__':
     # Test cases
-    os.system('cls')
-    main(sys.argv[1], sys.argv[2])
+    main()
