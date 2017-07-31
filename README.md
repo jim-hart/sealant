@@ -33,7 +33,9 @@ The default character set can be replaced by the user if desired.  String output
   3. `.txt` file
 
 
-#### Additional Contributers
+---
+
+## Additional Contributers
 
 **P. Robertson** - User experience consolation 
 
