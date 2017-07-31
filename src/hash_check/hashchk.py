@@ -2,6 +2,7 @@ import hashlib
 import sys
 import os
 import hmac  # Python 2.7 and 3.3+
+import argparse
 
 # terminal colors
 import colorama
@@ -60,6 +61,19 @@ class HashCheck(object):
             print("\n ************************{}FAIL: Digests DO NOT Match{}*************************\n".format(
                 Fore.RED, Style.RESET_ALL))
 
+class HashChkParser(object):
+
+    def __init__(self):
+        self.parser = self.get_parser()
+
+
+    def create_parser(self):
+        """Returns parser object used for all argparse arguments"""
+
+        return argparse.ArgumentParser(
+            description="Generate and compare hash digests")
+
+    
 
 def main(target_file, digest_file):
     """Prints out comparison of two hash digests: one generated from a file, and
