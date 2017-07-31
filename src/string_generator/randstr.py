@@ -1,10 +1,11 @@
-mfrom __future__ import print_function
-from datetime import datetime
+from __future__ import print_function
+from six.moves import range
 
 import os
 import sys
 import random
 import string
+import datetime
 import pyperclip
 import argparse  # Not Available for Python 3.0 and 3.1
 
@@ -149,7 +150,7 @@ class RandStrParser(object):
 
         # file output
         filename = "output_str_{}.txt".format(
-            datetime.now().strftime('%a%d-%H%M%S'))
+            datetime.datetime.now().strftime('%a%d-%H%M%S'))
 
         self.parser.add_argument(
             '-f', '--file', nargs='?', const=filename,
