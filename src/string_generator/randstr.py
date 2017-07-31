@@ -9,6 +9,8 @@ import datetime
 import pyperclip
 import argparse  # Not Available for Python 3.0 and 3.1
 
+#TODO: Add argument groups for input/output argparse options
+
 # ----------------------------Randomization Method-----------------------------
 """This program utilizes SystemRandom, which generates cryptographically random
 data from an OS-specific source. Windows uses CryptGenRandom() while *nix should
