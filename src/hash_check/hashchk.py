@@ -62,20 +62,19 @@ class HashCheck(object):
 
 class HashChkParser(object):
     def __init__(self):
-        self.parser = self.create_parser()
+        self.subparser = self.create_parser()
         self.args = self.get_parser_args()
 
     @staticmethod
-    def create_parser():
-        """Returns parser object used for all argparse arguments"""
+    def create_subparser():
+        """Returns subparser object used for all argparse arguments"""
 
-        return argparse.ArgumentParser(
-            description="Generate and compare hash digests", 
-            epilog="""Hashchk requires two hash digests from any source.  It \
-                   can generate digests from a file, read digests stored in \
-                   .txt files, or be provided a digest directly through \
-                   standard input.  Any combination of any two inputs (even \
-                   the same input type twice) will be accepted.""")
+        parser = argparse.ArgumentParser(
+            description="Generate and compare hash digests")
+
+        return parser.add_subparsers(title="Subcommands",
+            description="Avaiable Actions")
+            
 
     def get_parser_args(self):
         """Calls method responsible for adding parser arguments, after which,
@@ -87,6 +86,7 @@ class HashChkParser(object):
     def add_arguments(self):
         """Organizational method for holding arguments added to self.parser
         object."""
+
         pass
 
 
