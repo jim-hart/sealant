@@ -12,6 +12,7 @@ import pyperclip
 import argparse  # Not Available for Python 3.0 and 3.1
 
 #TODO: Add argument groups for input/output argparse options
+#TODO: Make length posistional argument
 
 # ----------------------------Randomization Method-----------------------------
 """This program utilizes SystemRandom, which generates cryptographically random

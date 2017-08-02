@@ -1,15 +1,15 @@
 # ----------------------------Compatibility Imports----------------------------
 from __future__ import print_function
-from builtins import dict
 from six.moves import range
 # -----------------------------------------------------------------------------
 
 import hashlib
 import argparse
 import colorama
-import sys
 import os
+import sys
 import hmac  # Python 2.7 and 3.3+
+
 
 # TODO: Implement hash method choices
 # TODO: Repent for not adding docstrings, then add the docstinrgs.  
@@ -18,37 +18,21 @@ class HashCheck(object):
     """Class for comparing a provided checksum file against the locally
     generated checksum of that file"""
 
-    def __init__(self, digest_sources):
-        self.digest_sources = digest_sources
-        self.digests = self.process_digest_sources()
-
-
-    def process_digest_sources(self):
-        """Returns list of tuples containing hash digests from
-        self.digest_sources.  If digest is either generated from, or provided
-        through a file filename, source is sent to approriate file handling
-        method first."""
-
-        digests = []
-        file_sources = {'txt': self.read_digest_file, 
-                        'bin': self.generate_digest}
-
-        for attr, values in self.digest_sources.items():
-            while values:
-                value = values.pop(0)
-                if attr in file_sources.keys():
-                    digests.append((attr, file_sources[attr](value)))                
-                else:
-                    digests.append((attr, value))
-
-        return digests
+    def __init__(self, parsed_args):
+        self.provided_digest = parsed_args.digest
+        self.binary_file = parsed_args.binary
 
     @staticmethod
-    def read_digest_file(filename):
-        """Returns contents of provided checksum file (if one is provided)"""
+    def process_provided_digest(digest):
+        """Either returns digest read from file, or returns digest with
+        leading/trailing whitespace stripped.  Process action based on digest
+        source."""
 
-        with open(filename, 'r') as f:
-            return f.read().split(' ')[0]
+        if os.path.isfile(digest):
+            with open(digest, 'r') as f:
+                return f.read().split(' ')[0]
+        else:
+            return digest.strip()
 
     @staticmethod
     def generate_digest(filename):
@@ -65,19 +49,23 @@ class HashCheck(object):
                 hash_digest.update(data)
 
         return hash_digest.hexdigest()
-        
 
     def compare_digests(self):
-        """Compares and prints out results of generated and provided hash digest"""
+        """Compares and prints out results of generated and provided hash
+        digest"""
 
         print("\n --------------------------------Comparing Now--------------------------------\n")
 
-        digest_1, digest_2 = self.digests[0][1], self.digests[1][1]
+        # provided printout
+        provided_digest = self.process_provided_digest(self.provided_digest)
+        print(" Provided :{}".format(provided_digest))
 
-        for digest in self.digests:
-            print(" {}:{}".format(digest[0].upper(), digest[1]))
+        # stdout used to provide status message while digest is being generated
+        sys.stdout.write(' Generated: {}'.format('Calculating'.center(60)))
+        generated_digest = self.generate_digest(self.binary_file)
+        sys.stdout.write("\r Generated:{}\n".format(generated_digest))
 
-        if hmac.compare_digest(digest_1, digest_2):
+        if hmac.compare_digest(provided_digest, generated_digest):
             print("\n ---------------------------{}SUCCESS: Digests Match{}----------------------------\n".format(
                 colorama.Fore.CYAN, colorama.Style.RESET_ALL))
         else:
@@ -88,6 +76,7 @@ class HashCheck(object):
 class HashChkParser(object):
     def __init__(self):
         self.parser = self.create_parser()
+        self.subparser = self.create_subparser()
         self.args = self.get_parser_args()
 
     @staticmethod
@@ -95,43 +84,47 @@ class HashChkParser(object):
         """Returns parser object used for all argparse arguments"""
 
         return argparse.ArgumentParser(
-            description="Generate and compare hash digests", 
-            epilog="""Hashchk requires two hash digests from any source.  It \
-                   can generate digests from a file, read digests stored in \
-                   .txt files, or be provided a digest directly through \
-                   standard input.  Any combination of any two inputs (even \
-                   the same input type twice) will be accepted.""")
+            description="Generate and compare hash digests")
+
+    def create_subparser(self):
+        """Creates and returns subparser object derived from self.parser"""
+
+        return self.parser.add_subparsers(title="Subcommands",
+                                          description="Avaiable Actions")
 
     def get_parser_args(self):
-        """Calls method responsible for adding parser arguments, after which,
+        """Calls method responsible for adding subparser arguments, after which,
         non-emtpy arguments retrieved through parser are returned as a dictionary"""
 
-        self.add_arguments()
-        parsed_args = vars(self.parser.parse_args())        
-        
-        # Check that only 2 digest sources provided
-        if sum(len(values) for values in parsed_args.values() if values) != 2:
-            print("ERROR: hashchk uses 2 and ONLY 2 digest sources")
-            sys.exit("""Check that digest sources meet this requirement.""")
-        else:
-            return parsed_args
+        self.create_verify_subparser()
 
+        return self.parser.parse_args()
 
-    def add_arguments(self):
-        """Organizational method for holding arguments added to self.parser
-        object."""
+    def create_verify_subparser(self):
+        """Creates the 'verify' subparser and adds related arguments"""
 
-        self.parser.add_argument(
-            '-bin', '--binary-file', action="append", metavar='FILENAME', dest='bin',
-            help="Generate a hash digest of the following file")
+        verify_parser = self.subparser.add_parser(
+            'verify',
+            help="Generate a hash digest from a binary and compare it against \
+            a provided SHA-digest")
 
-        self.parser.add_argument(
-            '-txt', '--text-file', action="append", metavar='FILENAME', dest='txt', 
-            help="Read the digest stored in the following .txt file")
+        verify_parser.add_argument(
+            '-d', '--digest', required=True, metavar="STRING|FILENAME",
+            help="Either a string or filename containing the SHA-2 hash digest")
 
-        self.parser.add_argument(
-            '-stdin', '--standard-input', action="append", metavar='STRING', dest='stdin', 
-            help="Take the following string as a hash digest")
+        verify_parser.add_argument(
+            '-bin', '--binary-file', dest='binary', required=True,
+            metavar="FILENAME",
+            help="Binary file to compare the provided SHA digest against")
+
+        verify_parser.add_argument(
+            '--insecure', metavar='HASH-ALGORITHM', choices=['md5', 'sha1'],
+            help="WARNING: MD5 and SHA-1 suffer from vulnerabilities (MD5 to a \
+            much greater extent)  While SHA-1 is significantly more secure \
+            than MD5, recent collision attacks have demonstrated its \
+            vulnerabilities as well, albeit at the cost of significant \
+            computational resources. This switch must be used with the HA's \
+            name if you want to use them for comparing digests.")
 
 
 def main():
@@ -145,6 +138,6 @@ def main():
     parsed_args = HashChkParser().args
     HashCheck(parsed_args).compare_digests()
 
-    
+
 if __name__ == '__main__':
     main()
