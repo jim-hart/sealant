@@ -7,6 +7,7 @@ import hashlib
 import argparse
 import colorama
 import os
+import sys
 import hmac  # Python 2.7 and 3.3+
 
 
@@ -18,8 +19,8 @@ class HashCheck(object):
     generated checksum of that file"""
 
     def __init__(self, parsed_args):
-        self.provided_digest = self.process_provided_digest(parsed_args.digest)
-        self.generated_digest = self.generated_digest(parsed_args.binary)
+        self.provided_digest = parsed_args.digest
+        self.binary_file = parsed_args.binary
 
     @staticmethod
     def process_provided_digest(digest):
@@ -50,16 +51,21 @@ class HashCheck(object):
         return hash_digest.hexdigest()
 
     def compare_digests(self):
-        """Compares and prints out results of generated and provided hash digest"""
-
-        pass
+        """Compares and prints out results of generated and provided hash
+        digest"""
 
         print("\n --------------------------------Comparing Now--------------------------------\n")
 
-        print("Provided :{}".format(self.provided_digest))
-        print("Generated:{}".format(self.generated_digest))
+        # provided printout
+        provided_digest = self.process_provided_digest(self.provided_digest)
+        print(" Provided :{}".format(provided_digest))
 
-        if hmac.compare_digest(self.provided_digest, self.generated_digest):
+        # stdout used to provide status message while digest is being generated
+        sys.stdout.write(' Generated: {}'.format('Calculating'.center(60)))
+        generated_digest = self.generate_digest(self.binary_file)
+        sys.stdout.write("\r Generated:{}\n".format(generated_digest))
+
+        if hmac.compare_digest(provided_digest, generated_digest):
             print("\n ---------------------------{}SUCCESS: Digests Match{}----------------------------\n".format(
                 colorama.Fore.CYAN, colorama.Style.RESET_ALL))
         else:
