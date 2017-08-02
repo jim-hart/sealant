@@ -19,29 +19,7 @@ class HashCheck(object):
     generated checksum of that file"""
 
     def __init__(self, digest_sources):
-        self.digest_sources = digest_sources
-        self.digests = self.process_digest_sources()
-
-
-    def process_digest_sources(self):
-        """Returns list of tuples containing hash digests from
-        self.digest_sources.  If digest is either generated from, or provided
-        through a file filename, source is sent to approriate file handling
-        method first."""
-
-        digests = []
-        file_sources = {'txt': self.read_digest_file, 
-                        'bin': self.generate_digest}
-
-        for attr, values in self.digest_sources.items():
-            while values:
-                value = values.pop(0)
-                if attr in file_sources.keys():
-                    digests.append((attr, file_sources[attr](value)))                
-                else:
-                    digests.append((attr, value))
-
-        return digests
+        pass
 
     @staticmethod
     def read_digest_file(filename):
@@ -70,19 +48,16 @@ class HashCheck(object):
     def compare_digests(self):
         """Compares and prints out results of generated and provided hash digest"""
 
-        print("\n --------------------------------Comparing Now--------------------------------\n")
+        pass
 
-        digest_1, digest_2 = self.digests[0][1], self.digests[1][1]
+        # print("\n --------------------------------Comparing Now--------------------------------\n")
 
-        for digest in self.digests:
-            print(" {}:{}".format(digest[0].upper(), digest[1]))
-
-        if hmac.compare_digest(digest_1, digest_2):
-            print("\n ---------------------------{}SUCCESS: Digests Match{}----------------------------\n".format(
-                colorama.Fore.CYAN, colorama.Style.RESET_ALL))
-        else:
-            print("\n ************************{}FAIL: Digests DO NOT Match{}*************************\n".format(
-                colorama.Fore.RED, colorama.Style.RESET_ALL))
+        # if hmac.compare_digest(digest_1, digest_2):
+        #     print("\n ---------------------------{}SUCCESS: Digests Match{}----------------------------\n".format(
+        #         colorama.Fore.CYAN, colorama.Style.RESET_ALL))
+        # else:
+        #     print("\n ************************{}FAIL: Digests DO NOT Match{}*************************\n".format(
+        #         colorama.Fore.RED, colorama.Style.RESET_ALL))
 
 
 class HashChkParser(object):
@@ -107,31 +82,12 @@ class HashChkParser(object):
         non-emtpy arguments retrieved through parser are returned as a dictionary"""
 
         self.add_arguments()
-        parsed_args = vars(self.parser.parse_args())        
+    
         
-        # Check that only 2 digest sources provided
-        if sum(len(values) for values in parsed_args.values() if values) != 2:
-            print("ERROR: hashchk uses 2 and ONLY 2 digest sources")
-            sys.exit("""Check that digest sources meet this requirement.""")
-        else:
-            return parsed_args
-
-
     def add_arguments(self):
         """Organizational method for holding arguments added to self.parser
         object."""
-
-        self.parser.add_argument(
-            '-bin', '--binary-file', action="append", metavar='FILENAME', dest='bin',
-            help="Generate a hash digest of the following file")
-
-        self.parser.add_argument(
-            '-txt', '--text-file', action="append", metavar='FILENAME', dest='txt', 
-            help="Read the digest stored in the following .txt file")
-
-        self.parser.add_argument(
-            '-stdin', '--standard-input', action="append", metavar='STRING', dest='stdin', 
-            help="Take the following string as a hash digest")
+        pass
 
 
 def main():
