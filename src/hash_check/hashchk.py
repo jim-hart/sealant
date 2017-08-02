@@ -80,18 +80,35 @@ class HashChkParser(object):
             description="Avaiable Actions")
             
 
-    def get_subparser_args(self):
+    def get_parser_args(self):
         """Calls method responsible for adding subparser arguments, after which,
         non-emtpy arguments retrieved through parser are returned as a dictionary"""
-
-        self.add_arguments()
+        pass
     
         
-    def add_arguments(self):
-        """Organizational method for holding arguments added to self.parser
-        object."""
+    def create_verify_subparser(self):
+        """Creates the 'verify' subparser and adds related arguments"""
 
-        pass
+        verify_parser = self.subparser.add_parser('verify',
+            help="Generate a hash digest from a binary and compare it against \
+            a provided SHA-digest")
+
+        verify_parser.add_argument('-d', '--digest', 
+            required=True, metavar="STRING|FILENAME", 
+            help="Either a string or filename containing the SHA-2 hash digest")           
+
+        verify_parser.add_argument('-bin', '--binary-file', dest='binary', 
+            required=True, metavar="FILENAME", 
+            help="Binary file to compare the provided SHA digest against")
+
+        verify_parser.add_argument('--insecure' 
+            metavar='HASH-ALGORITHM', choices=['md5', 'sha1']
+            help="WARNING: MD5 and SHA-1 suffer from vulnerabilties (MD5 to a \
+            much greater extent)  While SHA-1 is significantly more secure \
+            than MD5, recent collision attacks have demonstrated its \
+            vulnerabilities as well, albeit at the cost of significant \
+            computational resources. This switch must be used with the HA's \
+            name if you want to use them for comparing digests.") 
 
 
 def main():
