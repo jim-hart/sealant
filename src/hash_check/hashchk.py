@@ -62,22 +62,26 @@ class HashCheck(object):
 
 class HashChkParser(object):
     def __init__(self):
-        self.subparser = self.create_parser()
+        self.parser = self.create_parser()
+        self.subparser = self.create_subparser()
         self.args = self.get_parser_args()
 
     @staticmethod
-    def create_subparser():
-        """Returns subparser object used for all argparse arguments"""
+    def create_parser():
+        """Returns parser object used for all argparse arguments"""
 
-        parser = argparse.ArgumentParser(
+        return argparse.ArgumentParser(
             description="Generate and compare hash digests")
 
-        return parser.add_subparsers(title="Subcommands",
+    def create_subparser(self):
+        """Creates and returns subparser object derived from self.parser"""
+        
+        return self.parser.add_subparsers(title="Subcommands",
             description="Avaiable Actions")
             
 
-    def get_parser_args(self):
-        """Calls method responsible for adding parser arguments, after which,
+    def get_subparser_args(self):
+        """Calls method responsible for adding subparser arguments, after which,
         non-emtpy arguments retrieved through parser are returned as a dictionary"""
 
         self.add_arguments()
