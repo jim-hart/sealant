@@ -18,9 +18,9 @@ class HashCheck(object):
     """Class for comparing a provided checksum file against the locally
     generated checksum of that file"""
 
-    def __init__(self, parsed_args):
-        self.provided_digest = parsed_args.digest
-        self.binary_file = parsed_args.binary
+    def __init__(self, provided_digest=None, binary_filename=None):
+        self.provided_digest = provided_digest
+        self.binary_filename = binary_filename
 
     @staticmethod
     def process_provided_digest(digest):
@@ -62,7 +62,7 @@ class HashCheck(object):
 
         # stdout used to provide status message while digest is being generated
         sys.stdout.write(' Generated: {}'.format('Calculating'.center(60)))
-        generated_digest = self.generate_digest(self.binary_file)
+        generated_digest = self.generate_digest(self.binary_filename)
         sys.stdout.write("\r Generated:{}\n".format(generated_digest))
 
         if hmac.compare_digest(provided_digest, generated_digest):
@@ -77,7 +77,7 @@ class HashChkParser(object):
     def __init__(self):
         self.parser = self.create_parser()
         self.subparser = self.create_subparser()
-        self.args = self.get_parser_args()
+        self.parsed_args = self.get_parser_args()
 
     @staticmethod
     def create_parser():
@@ -135,8 +135,9 @@ def main():
     os.system('cls')
     colorama.init(convert=True)
 
-    parsed_args = HashChkParser().args
-    HashCheck(parsed_args).compare_digests()
+    args = HashChkParser().parsed_args
+    HashCheck(
+        provided_digest=args.digest, binary_filename=args.binary).compare_digests()
 
 
 if __name__ == '__main__':
