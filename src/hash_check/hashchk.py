@@ -110,7 +110,7 @@ class Output(object):
     """Organizational class for reusable printout messages"""
 
     @staticmethod
-    def print_startup_message():
+    def print_comparison_startup():
         """Prints out startup message for comparison process"""
 
         print("\n {}Comparing Now{}\n".format(
@@ -135,7 +135,7 @@ def compare_verify_digests(verify_args):
     """Takes in parsed arguments from verify subparser and prints out comparison
     results"""
 
-    Output.print_startup_message()
+    Output.print_comparison_startup()
 
     # provided printout
     provided_digest = HashCheck.process_digest(verify_args.digest)
