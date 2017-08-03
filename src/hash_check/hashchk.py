@@ -15,15 +15,10 @@ import hmac  # Python 2.7 and 3.3+
 # TODO: Repent for not adding docstrings, then add the docstinrgs.  
 
 class HashCheck(object):
-    """Class for comparing a provided checksum file against the locally
-    generated checksum of that file"""
-
-    def __init__(self, provided_digest=None, binary_filename=None):
-        self.provided_digest = provided_digest
-        self.binary_filename = binary_filename
+    """Class for comparing, processing, and generating hash digests"""
 
     @staticmethod
-    def process_provided_digest(digest):
+    def process_digest(digest):
         """Either returns digest read from file, or returns digest with
         leading/trailing whitespace stripped.  Process action based on digest
         source."""
@@ -50,27 +45,11 @@ class HashCheck(object):
 
         return hash_digest.hexdigest()
 
-    def compare_digests(self):
-        """Compares and prints out results of generated and provided hash
-        digest"""
+    @staticmethod
+    def compare_digests(digest_1, digest_2):
+        """Returns True if digest_1 == digest_2"""
 
-        print("\n --------------------------------Comparing Now--------------------------------\n")
-
-        # provided printout
-        provided_digest = self.process_provided_digest(self.provided_digest)
-        print(" Provided :{}".format(provided_digest))
-
-        # stdout used to provide status message while digest is being generated
-        sys.stdout.write(' Generated: {}'.format('Calculating'.center(60)))
-        generated_digest = self.generate_digest(self.binary_filename)
-        sys.stdout.write("\r Generated:{}\n".format(generated_digest))
-
-        if hmac.compare_digest(provided_digest, generated_digest):
-            print("\n ---------------------------{}SUCCESS: Digests Match{}----------------------------\n".format(
-                colorama.Fore.CYAN, colorama.Style.RESET_ALL))
-        else:
-            print("\n ************************{}FAIL: Digests DO NOT Match{}*************************\n".format(
-                colorama.Fore.RED, colorama.Style.RESET_ALL))
+        return hmac.compare_digest(digest_1, digest_2)
 
 
 class HashChkParser(object):
@@ -90,11 +69,11 @@ class HashChkParser(object):
         """Creates and returns subparser object derived from self.parser"""
 
         return self.parser.add_subparsers(title="Subcommands",
-                                          description="Avaiable Actions")
+                                          description="Available Actions")
 
     def get_parser_args(self):
         """Calls method responsible for adding subparser arguments, after which,
-        non-emtpy arguments retrieved through parser are returned as a dictionary"""
+        non-empty arguments retrieved through parser are returned as a dictionary"""
 
         self.create_verify_subparser()
 
@@ -127,18 +106,54 @@ class HashChkParser(object):
             name if you want to use them for comparing digests.")
 
 
-def main():
-    """Prints out comparison of two hash digests: one generated from a file, and
-    one provided with the file to be checked.  File names are provided via
-    command line."""
+class Output(object):
+    """Organizational class for reusable printout messages"""
 
+    @staticmethod
+    def print_comparison_startup():
+        """Prints out startup message for comparison process"""
+
+        print("\n {}Comparing Now{}\n".format(
+            "--------------------------------",
+            "--------------------------------"))
+
+    @staticmethod
+    def print_comparison_results(comparison_result):
+        """Prints out results of comparison between two hash digests"""
+
+        if comparison_result:
+            print("\n {}{}SUCCESS: Digests Match{}{}\n".format(
+                "---------------------------", colorama.Fore.CYAN,
+                colorama.Style.RESET_ALL, "----------------------------"))
+        else:
+            print("\n {}{}FAIL: Digests DO NOT Match{}{}\n".format(
+                "************************", colorama.Fore.RED,
+                colorama.Style.RESET_ALL, "*************************"))
+
+
+def compare_verify_digests(verify_args):
+    """Takes in parsed arguments from verify subparser and prints out comparison
+    results"""
+
+    Output.print_comparison_startup()
+
+    # provided printout
+    provided_digest = HashCheck.process_digest(verify_args.digest)
+    print(" Provided :{}".format(provided_digest))
+
+    # stdout used to provide status message while digest is being generated
+    sys.stdout.write(' Generated: {}'.format('Calculating'.center(60)))
+    generated_digest = HashCheck.generate_digest(args.binary)
+    sys.stdout.write("\r Generated:{}\n".format(generated_digest))
+
+    # Compare and printout results
+    result = HashCheck.compare_digests(provided_digest, generated_digest)
+    Output.print_comparison_results(result)
+
+
+if __name__ == '__main__':
     os.system('cls')
     colorama.init(convert=True)
 
     args = HashChkParser().parsed_args
-    HashCheck(
-        provided_digest=args.digest, binary_filename=args.binary).compare_digests()
-
-
-if __name__ == '__main__':
-    main()
+    compare_verify_digests(args)
