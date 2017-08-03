@@ -48,8 +48,8 @@ class HashCheck(object):
     @staticmethod
     def compare_digests(digest_1, digest_2):
         """Returns True if digest_1 == digest_2"""
-        
-        return hmac.compare_digest(digest_1, digest_2):
+
+        return hmac.compare_digest(digest_1, digest_2)
 
 
 class HashChkParser(object):
@@ -117,7 +117,7 @@ def main():
     print("\n --------------------------------Comparing Now--------------------------------\n")
 
     # provided printout
-    provided_digest = digests.process_provided_digest(args.digest)
+    provided_digest = digests.process_digest(args.digest)
     print(" Provided :{}".format(provided_digest))
 
     # stdout used to provide status message while digest is being generated
@@ -131,7 +131,6 @@ def main():
     else:
         print("\n ************************{}FAIL: Digests DO NOT Match{}*************************\n".format(
             colorama.Fore.RED, colorama.Style.RESET_ALL))
-
 
 
 if __name__ == '__main__':
