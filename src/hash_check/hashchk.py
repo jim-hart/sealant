@@ -69,11 +69,11 @@ class HashChkParser(object):
         """Creates and returns subparser object derived from self.parser"""
 
         return self.parser.add_subparsers(title="Subcommands",
-                                          description="Avaiable Actions")
+                                          description="Available Actions")
 
     def get_parser_args(self):
         """Calls method responsible for adding subparser arguments, after which,
-        non-emtpy arguments retrieved through parser are returned as a dictionary"""
+        non-empty arguments retrieved through parser are returned as a dictionary"""
 
         self.create_verify_subparser()
 
@@ -106,34 +106,54 @@ class HashChkParser(object):
             name if you want to use them for comparing digests.")
 
 
-def main():
-    """Prints out comparison of two hash digests: one generated from a file, and
-    one provided with the file to be checked.  File names are provided via
-    command line."""
+class Output(object):
+    """Organizational class for reusable printout messages"""
 
-    args = HashChkParser().parsed_args
-    digests = HashCheck()
+    @staticmethod
+    def print_startup_message():
+        """Prints out startup message for comparison process"""
 
-    print("\n --------------------------------Comparing Now--------------------------------\n")
+        print("\n {}Comparing Now{}\n".format(
+            "--------------------------------",
+            "--------------------------------"))
+
+    @staticmethod
+    def print_comparison_results(comparison_result):
+        """Prints out results of comparison between two hash digests"""
+
+        if comparison_result:
+            print("\n {}{}SUCCESS: Digests Match{}{}\n".format(
+                "---------------------------", colorama.Fore.CYAN,
+                colorama.Style.RESET_ALL, "----------------------------"))
+        else:
+            print("\n {}{}FAIL: Digests DO NOT Match{}{}\n".format(
+                "************************", colorama.Fore.RED,
+                colorama.Style.RESET_ALL, "*************************"))
+
+
+def compare_verify_digests(verify_args):
+    """Takes in parsed arguments from verify subparser and prints out comparison
+    results"""
+
+    Output.print_startup_message()
 
     # provided printout
-    provided_digest = digests.process_digest(args.digest)
+    provided_digest = HashCheck.process_digest(verify_args.digest)
     print(" Provided :{}".format(provided_digest))
 
     # stdout used to provide status message while digest is being generated
     sys.stdout.write(' Generated: {}'.format('Calculating'.center(60)))
-    generated_digest = digests.generate_digest(args.binary)
+    generated_digest = HashCheck.generate_digest(args.binary)
     sys.stdout.write("\r Generated:{}\n".format(generated_digest))
 
-    if digests.compare_digests(provided_digest, generated_digest):
-        print("\n ---------------------------{}SUCCESS: Digests Match{}----------------------------\n".format(
-            colorama.Fore.CYAN, colorama.Style.RESET_ALL))
-    else:
-        print("\n ************************{}FAIL: Digests DO NOT Match{}*************************\n".format(
-            colorama.Fore.RED, colorama.Style.RESET_ALL))
+    # Compare and printout results
+    result = HashCheck.compare_digests(provided_digest, generated_digest)
+    Output.print_comparison_results(result)
 
 
 if __name__ == '__main__':
     os.system('cls')
     colorama.init(convert=True)
-    main()
+
+    args = HashChkParser().parsed_args
+    compare_verify_digests(args)
