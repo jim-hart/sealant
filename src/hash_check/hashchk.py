@@ -12,8 +12,7 @@ import hmac  # Python 2.7 and 3.3+
 
 
 # TODO: Implement hash method choices
-# TODO: Repent for not adding docstrings, then add the docstinrgs.  
-
+# TODO: Repent for not adding doc-strings, then add the doc-strings
 class HashCheck(object):
     """Class for comparing, processing, and generating hash digests"""
 
@@ -56,34 +55,32 @@ class HashChkParser(object):
     def __init__(self):
         self.parser = self.create_parser()
         self.subparser = self.create_subparser()
-        self.parsed_args = self.get_parser_args()
+
+        self.add_subparser_parsers()
 
     @staticmethod
     def create_parser():
-        """Returns parser object used for all argparse arguments"""
+        """Returns main parser object used for all argparse arguments"""
 
         return argparse.ArgumentParser(
             description="Generate and compare hash digests")
 
     def create_subparser(self):
-        """Creates and returns subparser object derived from self.parser"""
+        """returns main subparser derived from self.parser"""
 
-        return self.parser.add_subparsers(title="Subcommands",
+        return self.parser.add_subparsers(title="Commands",
                                           description="Available Actions")
 
-    def get_parser_args(self):
-        """Calls method responsible for adding subparser arguments, after which,
-        non-empty arguments retrieved through parser are returned as a dictionary"""
+    def add_subparser_parsers(self):
+        """Calls methods responsible for adding parsers to main subparser"""
 
-        self.create_verify_subparser()
+        self.add_verify_subparser()
 
-        return self.parser.parse_args()
-
-    def create_verify_subparser(self):
+    def add_verify_subparser(self):
         """Creates the 'verify' subparser and adds related arguments"""
 
         verify_parser = self.subparser.add_parser(
-            'verify',
+            'verify', action='store_true',
             help="Generate a hash digest from a binary and compare it against \
             a provided SHA-digest")
 
@@ -97,13 +94,16 @@ class HashChkParser(object):
             help="Binary file to compare the provided SHA digest against")
 
         verify_parser.add_argument(
-            '--insecure', metavar='HASH-ALGORITHM', choices=['md5', 'sha1'],
-            help="WARNING: MD5 and SHA-1 suffer from vulnerabilities (MD5 to a \
-            much greater extent)  While SHA-1 is significantly more secure \
-            than MD5, recent collision attacks have demonstrated its \
-            vulnerabilities as well, albeit at the cost of significant \
-            computational resources. This switch must be used with the HA's \
-            name if you want to use them for comparing digests.")
+            '--insecure', metavar='HASH-ALGORITHM', choices=['MD5', 'SHA1'],
+            help="""WARNING: MD5 and SHA1 are insecure hash algorithms; they \
+            should only be used to check for unintentional data corruption. If \
+            your options are limited to MD5 and/or SHA1, you can force \
+            comparison using this switch followed by the HA name.""")
+
+    def get_parser_args(self):
+        """Returns arguments parsed by main argparse object"""
+
+        return self.parser.parse_args()
 
 
 class Output(object):
@@ -155,5 +155,5 @@ if __name__ == '__main__':
     os.system('cls')
     colorama.init(convert=True)
 
-    args = HashChkParser().parsed_args
+    args = HashChkParser().get_parser_args()
     compare_verify_digests(args)
