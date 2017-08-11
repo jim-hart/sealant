@@ -8,6 +8,7 @@ import os
 import sys
 import hmac  # Python 2.7 and 3.3+
 
+# from hashchk_parser.py
 from hashchk_parser import (HashChkParser, Output)
 
 
@@ -33,13 +34,14 @@ class HashCheck(object):
     def generate_digest(filename):
         """Returns hexadecimal digest generated from filename"""
 
-        # File is read in 4096 byte blocks to cut down on memory usage
-        blocks = (os.path.getsize(filename) // 4096) + 1
+        buffer_size = 65536 # Buffer used to cut down on memory for large files.
+        blocks = (os.path.getsize(filename) // buffer_size) + 1
+
         hash_digest = hashlib.sha256()
 
         with open(filename, 'rb') as f:
-            # Blocks are read via generator expression for improved performance
-            generator = (f.read(4096) for _ in range(blocks))
+            #generator expression used for reading file in chunks
+            generator = (f.read(buffer_size) for _ in range(blocks))
             for data in generator:
                 hash_digest.update(data)
 
@@ -52,7 +54,7 @@ class HashCheck(object):
         return hmac.compare_digest(digest_1, digest_2)
 
 
-def compare_verify_digests(verify_args):
+def _compare_verify_digests(verify_args):
     """Takes in parsed arguments from HashChkParserverify subparser and prints
     out comparison results."""
 
