@@ -1,11 +1,13 @@
 from __future__ import print_function
 
+import os
+import sys
 import argparse
 import colorama
 
-colorama.init(convert=True)
+from hashchk import HashCheck
 
-"""Argparse and terminal output classes"""
+"""Classes and functions for hashchk terminal use"""
 
 
 class HashChkParser(object):
@@ -88,3 +90,30 @@ class Output(object):
             print("\n {}{}FAIL: Digests DO NOT Match{}{}\n".format(
                 "************************", colorama.Fore.RED,
                 colorama.Style.RESET_ALL, "*************************"))
+
+
+def _compare_verify_digests(verify_args):
+    """Takes in parsed arguments from HashChkParserverify subparser and prints
+    out comparison results."""
+
+    Output.print_comparison_startup()
+
+    # provided printout
+    provided_digest = HashCheck.process_digest(verify_args.digest)
+    print(" Provided :{}".format(provided_digest))
+
+    # stdout used to provide status message while digest is being generated
+    sys.stdout.write(' Generated: {}'.format('Calculating'.center(60)))
+    generated_digest = HashCheck.generate_digest(args.binary)
+    sys.stdout.write("\r Generated:{}\n".format(generated_digest))
+
+    # Compare and printout results
+    result = HashCheck.compare_digests(provided_digest, generated_digest)
+    Output.print_comparison_results(result)
+
+
+if __name__ == '__main__':
+    os.system('cls')
+    colorama.init(convert=True)
+    args = HashChkParser().get_parser_args()
+    _compare_verify_digests(args)
