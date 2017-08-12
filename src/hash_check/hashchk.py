@@ -1,12 +1,15 @@
 # ----------------------------Compatibility Imports----------------------------
 from __future__ import print_function
 from six.moves import range
+
+import sys
+import hashlib
+if sys.version_info < (3, 6):
+    import sha3
 # -----------------------------------------------------------------------------
 
-import hashlib
 import os
 import hmac  # Python 2.7 and 3.3+
-
 
 # TODO: Implement hash method choices
 
@@ -57,7 +60,7 @@ class HashCheck(object):
 
     @staticmethod
     def compare_digests(digest_1, digest_2):
-        """Returns True if digest_1 == digest_2
+        """Returns result of equality comparison betwen digest_1 and digest_2
         
         Args:
             digest_1 (str): digest to be compared against digest_2
@@ -68,4 +71,5 @@ class HashCheck(object):
         """
 
         return hmac.compare_digest(digest_1, digest_2)
+
 
