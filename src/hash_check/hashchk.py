@@ -97,6 +97,4 @@ def determine_sha_method(digest, family='sha2'):
 
 
 if __name__ == '__main__':
-    s = determine_sha_method(
-        'cda7a4ef4ff52524f06ebb8a3aea815f7df0dbcf27a7d501141f6f0fdf726ccd')
-    print(s)
+    pass
