@@ -4,12 +4,14 @@ from six.moves import range
 
 import sys
 import hashlib
+
 if sys.version_info < (3, 6):
     import sha3
 # -----------------------------------------------------------------------------
 
 import os
 import hmac  # Python 2.7 and 3.3+
+
 
 # TODO: Implement hash method choices
 
@@ -25,7 +27,7 @@ class HashCheck(object):
             digest (str): filename or string containing digest to be processed
         
         Returns:
-            str: hash digest stipped of leading and trailing whitespace
+            str: hash digest stripped of leading and trailing whitespace
         """
 
         if os.path.isfile(digest):
@@ -60,7 +62,7 @@ class HashCheck(object):
 
     @staticmethod
     def compare_digests(digest_1, digest_2):
-        """Returns result of equality comparison betwen digest_1 and digest_2
+        """Returns result of equality comparison between digest_1 and digest_2
         
         Args:
             digest_1 (str): digest to be compared against digest_2
@@ -73,3 +75,28 @@ class HashCheck(object):
         return hmac.compare_digest(digest_1, digest_2)
 
 
+def determine_sha_method(digest, family='sha2'):
+    """Returns SHA method to be used for digest comparison
+    
+    Args:
+        digest (str): user provided hexdigest used to determine sha method
+        family (str, optional): determines sha2 vs sha3 usage
+    
+    Returns:
+        object: built in hashlib method built from sha_variants dictionary
+    """
+
+    sha_versions = {
+        'sha2': {56: 'sha224', 64: 'sha256', 96: 'sha384', 128: 'sha512'},
+        'sha3': {56: 'sha3_224', 64: 'sha3_256', 96: 'sha3_384', 128: 'sha3_512'}
+    }
+
+    variant = sha_versions[family][len(digest)]
+
+    return getattr(hashlib, variant)
+
+
+if __name__ == '__main__':
+    s = determine_sha_method(
+        'cda7a4ef4ff52524f06ebb8a3aea815f7df0dbcf27a7d501141f6f0fdf726ccd')
+    print(s)
