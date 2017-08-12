@@ -6,6 +6,7 @@ import sys
 import hashlib
 
 if sys.version_info < (3, 6):
+    # noinspection PyUnresolvedReferences
     import sha3
 # -----------------------------------------------------------------------------
 
@@ -13,7 +14,8 @@ import os
 import hmac  # Python 2.7 and 3.3+
 
 
-# TODO: Implement hash method choices
+# TODO: Implement SHAKE and BLAKE
+# TODO: Resist urge to call it "SHAKE'N BLAKE"
 
 class HashCheck(object):
     """Class for comparing, processing, and generating hash digests."""
@@ -22,10 +24,10 @@ class HashCheck(object):
     def process_digest(digest):
         """Determines if source of digest is stored in a text file, or if it's a
         string provided by user.
-        
+
         Args:
             digest (str): filename or string containing digest to be processed
-        
+
         Returns:
             str: hash digest stripped of leading and trailing whitespace
         """
@@ -39,10 +41,10 @@ class HashCheck(object):
     @staticmethod
     def generate_digest(filename):
         """Returns hexadecimal digest generated from filename
-        
+
         Args:
             filename (str): filename of binary file
-        
+
         Returns:
             str: hash digest generated from binary file
         """
@@ -63,11 +65,11 @@ class HashCheck(object):
     @staticmethod
     def compare_digests(digest_1, digest_2):
         """Returns result of equality comparison between digest_1 and digest_2
-        
+
         Args:
             digest_1 (str): digest to be compared against digest_2
             digest_2 (str): digest to be compared against digest_1
-        
+
         Returns:
             bool: result of comparison of digest_1 and digest_2
         """
@@ -77,11 +79,11 @@ class HashCheck(object):
 
 def determine_sha_method(digest, family='sha2'):
     """Returns SHA method to be used for digest comparison
-    
+
     Args:
         digest (str): user provided hexdigest used to determine sha method
         family (str, optional): determines sha2 vs sha3 usage
-    
+
     Returns:
         object: built in hashlib method built from sha_variants dictionary
     """
