@@ -9,16 +9,21 @@ import hmac  # Python 2.7 and 3.3+
 
 
 # TODO: Implement hash method choices
-# TODO: Repent for not adding doc-strings, then add the doc-strings
 
 class HashCheck(object):
-    """Class for comparing, processing, and generating hash digests"""
+    """Class for comparing, processing, and generating hash digests."""
 
     @staticmethod
     def process_digest(digest):
-        """Either returns digest read from file, or returns digest with
-        leading/trailing whitespace stripped.  Process action based on digest
-        source."""
+        """Determines if source of digest is stored in a text file, or if it's a
+        string provided by user.
+        
+        Args:
+            digest (str): filename or string containing digest to be processed
+        
+        Returns:
+            str: hash digest stipped of leading and trailing whitespace
+        """
 
         if os.path.isfile(digest):
             with open(digest, 'r') as f:
@@ -28,7 +33,14 @@ class HashCheck(object):
 
     @staticmethod
     def generate_digest(filename):
-        """Returns hexadecimal digest generated from filename"""
+        """Returns hexadecimal digest generated from filename
+        
+        Args:
+            filename (str): filename of binary file
+        
+        Returns:
+            str: hash digest generated from binary file
+        """
 
         buffer_size = 65536  # Buffer used to cut down on memory for large files.
         blocks = (os.path.getsize(filename) // buffer_size) + 1
@@ -45,6 +57,15 @@ class HashCheck(object):
 
     @staticmethod
     def compare_digests(digest_1, digest_2):
-        """Returns True if digest_1 == digest_2"""
+        """Returns True if digest_1 == digest_2
+        
+        Args:
+            digest_1 (str): digest to be compared against digest_2
+            digest_2 (str): digest to be compared against digest_1
+        
+        Returns:
+            bool: result of comparison of digest_1 and digest_2
+        """
 
         return hmac.compare_digest(digest_1, digest_2)
+
