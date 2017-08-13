@@ -4,8 +4,7 @@ import os
 import sys
 import argparse
 import colorama
-
-from hashchk import HashCheck
+import hashchk
 
 """Classes and functions for hashchk terminal use"""
 
@@ -103,22 +102,23 @@ class Output(object):
 
 
 def _compare_verify_digests(verify_args):
-    """Takes in parsed arguments from HashChkParserverify subparser and prints
+    """Takes in parsed arguments from HashChkParser verify subparser and prints
     out comparison results."""
 
     Output.print_comparison_startup()
+    digest = hashchk.Digest()
 
     # provided printout
-    provided_digest = HashCheck.process_digest(verify_args.digest)
+    provided_digest = digest.process_digest(verify_args.digest)
     print(" Provided :{}".format(provided_digest))
 
     # stdout used to provide status message while digest is being generated
     sys.stdout.write(' Generated: {}'.format('Calculating'.center(60)))
-    generated_digest = HashCheck.generate_digest(args.binary)
+    generated_digest = digest.generate_digest(args.binary)
     sys.stdout.write("\r Generated:{}\n".format(generated_digest))
 
     # Compare and printout results
-    result = HashCheck.compare_digests(provided_digest, generated_digest)
+    result = hashchk.compare_digests(provided_digest, generated_digest)
     Output.print_comparison_results(result)
 
 
