@@ -47,7 +47,8 @@ class HashChkParser(object):
 
         verify_parser.add_argument(
             '-d', '--digest', required=True, metavar="STRING|FILENAME",
-            help="Either a string or filename containing the SHA-2 hash digest")
+            help="Either a string or filename to a file containing the SHA hash \
+            digest")
 
         verify_parser.add_argument(
             '-bin', '--binary-file', dest='binary', required=True,
@@ -55,7 +56,16 @@ class HashChkParser(object):
             help="Binary file to compare the provided SHA digest against")
 
         verify_parser.add_argument(
-            '--insecure', metavar='HASH-ALGORITHM', choices=['MD5', 'SHA1'],
+            '-hf', '--hash-family', dest='hash_family', required=False,
+            metavar="NAME", choices=['sha2, sha3'], default='sha2',
+            help="The verify command defaults to SHA2 if the -hf switch isn't \
+            provided. You can use this switch along with the hash-family's \
+            name to override this default.  Specific hash functions within a \
+            family are automatically determined by the length of the digest \
+            provided to the -d switch.")
+
+        verify_parser.add_argument(
+            '--insecure', metavar='HASH-ALGORITHM', choices=['md5', 'sha1'],
             help="""WARNING: MD5 and SHA1 are insecure hash algorithms; they \
             should only be used to check for unintentional data corruption. If \
             your options are limited to MD5 and/or SHA1, you can force \

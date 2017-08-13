@@ -77,7 +77,7 @@ class HashCheck(object):
         return hmac.compare_digest(digest_1, digest_2)
 
 
-def determine_sha_method(digest, family='sha2'):
+def determine_sha_method(digest, family):
     """Returns SHA method to be used for digest comparison
 
     Args:
