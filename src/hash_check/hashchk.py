@@ -20,7 +20,10 @@ import hmac  # Python 2.7 and 3.3+
 class Digest(object):
     """Class for comparing, processing, and generating hash digests."""
 
-    def determine_sha_method(digest, family):
+    def __init__(self, hash_family):
+        self.family = hash_family
+
+    def build_hash_object(self, digest):
         """Returns SHA method to be used for digest comparison
 
         Args:
@@ -31,12 +34,18 @@ class Digest(object):
             object: built in hashlib method built from sha_variants dictionary
         """
 
-        sha_versions = {
+        fixed_variants = {
             'sha2': {56: 'sha224', 64: 'sha256', 96: 'sha384', 128: 'sha512'},
             'sha3': {56: 'sha3_224', 64: 'sha3_256', 96: 'sha3_384', 128: 'sha3_512'}
         }
 
-        variant = sha_versions[family][len(digest)]
+        dynamic_variants = {
+            'shake': {'128': 'shake_128', '256': 'shake_256'},
+            'blake': {'2s': 'blake2s', '2b': 'blake2b'}
+        }
+
+        if self.family in fixed_variants:
+            variant = fixed_variants[self.family][len(digest)]
 
         return getattr(hashlib, variant)
 
@@ -101,4 +110,4 @@ def compare_digests(digest_1, digest_2):
 
 
 if __name__ == '__main__':
-    pass
+    print(hashlib.blake2b.__dict__.keys())

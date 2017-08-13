@@ -40,35 +40,54 @@ class HashChkParser(object):
         """Creates the 'verify' subparser and adds related arguments"""
 
         verify_parser = self.subparser.add_parser(
-            'verify', action='store_true',
+            'verify',
             help="Generate a hash digest from a binary and compare it against \
-            a provided SHA-digest")
+            a provided digest. Hash method defaults to SHA-2 if algorithm \
+            family not specified by user")
 
-        verify_parser.add_argument(
-            '-d', '--digest', required=True, metavar="STRING|FILENAME",
-            help="Either a string or filename to a file containing the SHA hash \
+        #Required paramaters group
+        req_group = verify_parser.add_argument_group('Required Parameters')
+        req_group.add_argument(
+            '-dig', '--digest', required=True, metavar="STRING|FILENAME",
+            help="Either a string or filename to a file containing a valid hash \
             digest")
 
-        verify_parser.add_argument(
-            '-bin', '--binary-file', dest='binary', required=True,
-            metavar="FILENAME",
-            help="Binary file to compare the provided SHA digest against")
+        req_group.add_argument(
+            '-bin', '--binary', dest='binary', required=True,
+            metavar="FILENAME|PATH/FILENAME",
+            help="Generates a hash digest of of the file located at \
+            PATH/FILENAME, or just FILENAME if file is located in the cwd.")
 
-        verify_parser.add_argument(
-            '-hf', '--hash-family', dest='hash_family', required=False,
-            metavar="NAME", choices=['sha2, sha3'], default='sha2',
-            help="The verify command defaults to SHA2 if the -hf switch isn't \
-            provided. You can use this switch along with the hash-family's \
-            name to override this default.  Specific hash functions within a \
-            family are automatically determined by the length of the digest \
-            provided to the -d switch.")
+        # Hash algorithm choices
+        opt_group = verify_parser.add_argument_group('Algorithm Parameters')
+        opt_group.add_argument(
+            '-sha3', dest='hash_family', action='store_true',
+            help="Use SHA-3 (fixed length) instead of SHA-2.  Bit length is \
+            determined automatically based on digest processed through -d switch")
 
-        verify_parser.add_argument(
-            '--insecure', metavar='HASH-ALGORITHM', choices=['md5', 'sha1'],
+        opt_group.add_argument(
+            '-shake128', dest='hash_family', nargs=1, metavar='LENGTH',
+            help="Use SHA-3's SHAKE-128 with following LENGTH")
+
+        opt_group.add_argument(
+            '-shake256', dest='hash_family', nargs=1, metavar='LENGTH',
+            help="Use SHA-3's SHAKE-256 with following LENGTH")
+
+        opt_group.add_argument(
+            '-blake2', dest='hash_family', nargs='+', metavar="s|b **kwargs",
+            help="Acts as a wrapper for python's hashlib.blake2s() and \
+            hashlib.blake2b() methods. The only required paramater is the \
+            desired BLAKE2 version: s|b -- Although this switch can be \
+            used as without any kwargs, default values can be overridden using \
+            kwargs found in python3's documentation for BLAKE2s EXCEPT data, \
+            which is provided already through the -bin switch.")
+
+        opt_group.add_argument(
+            '--insecure', metavar='NAME', choices=['md5', 'sha1'],
             help="""WARNING: MD5 and SHA1 are insecure hash algorithms; they \
-            should only be used to check for unintentional data corruption. If \
-            your options are limited to MD5 and/or SHA1, you can force \
-            comparison using this switch followed by the HA name.""")
+            should only be used to check for unintentional data corruption. \
+            You can force use of one of these two methods by using this switch \
+            along with the hash algorithm name.""")
 
     def get_parser_args(self):
         """Returns arguments parsed by main argparse object"""
@@ -126,4 +145,4 @@ if __name__ == '__main__':
     os.system('cls')
     colorama.init(convert=True)
     args = HashChkParser().get_parser_args()
-    _compare_verify_digests(args)
+    #_compare_verify_digests(args)
