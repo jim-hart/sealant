@@ -8,6 +8,8 @@ import hashchk
 
 """Classes and functions for hashchk terminal use"""
 
+#TODO: Figure out what to do about sha3 argument under common groups
+
 
 class HashChkParser(object):
     """Class for creating and assembling argparse object used in hashchk.py"""
@@ -16,78 +18,82 @@ class HashChkParser(object):
         self.parser = self.create_parser()
         self.subparser = self.create_subparser()
 
-        self.add_subparser_parsers()
+        self.add_verify_subparser()
 
-    @staticmethod
-    def create_parser():
+
+    def create_parser(self):
         """Returns main parser object used for all argparse arguments"""
 
         return argparse.ArgumentParser(
             description="Generate and compare hash digests")
 
+
     def create_subparser(self):
         """returns main subparser derived from self.parser"""
 
-        return self.parser.add_subparsers(title="Commands",
-                                          description="Available Actions")
+        return self.parser.add_subparsers(
+            title="Commands", description="Available Actions")
 
-    def add_subparser_parsers(self):
-        """Calls methods responsible for adding parsers to main subparser"""
-
-        self.add_verify_subparser()
 
     def add_verify_subparser(self):
         """Creates the 'verify' subparser and adds related arguments"""
 
         verify_parser = self.subparser.add_parser(
             'verify',
-            help="Generate a hash digest from a binary and compare it against \
+            help="""Generate a hash digest from a binary and compare it against \
             a provided digest. Hash method defaults to SHA-2 if algorithm \
-            family not specified by user")
+            family not specified by user""")
 
-        #Required paramaters group
+        #Required parameters group
         req_group = verify_parser.add_argument_group('Required Parameters')
         req_group.add_argument(
-            '-dig', '--digest', required=True, metavar="STRING|FILENAME",
-            help="Either a string or filename to a file containing a valid hash \
-            digest")
+            '-d', '--digest', required=True, metavar="STRING|FILENAME",
+            help="""Either a string or filename to a file containing a valid \
+            hash digest""")
 
         req_group.add_argument(
             '-bin', '--binary', dest='binary', required=True,
             metavar="FILENAME|PATH/FILENAME",
-            help="Generates a hash digest of of the file located at \
-            PATH/FILENAME, or just FILENAME if file is located in the cwd.")
+            help="""Generates a hash digest of of the file located at \
+            PATH/FILENAME, or just FILENAME if file is located in the cwd.""")
 
-        # Hash algorithm choices
-        opt_group = verify_parser.add_argument_group('Algorithm Parameters')
-        opt_group.add_argument(
+        self.add_common_groups(verify_parser)
+
+    @staticmethod
+    def add_common_groups(parent):
+        """Adds common groups to subparser object.  While argparse supports a
+        parent option, it's a pain getting the groups in the right order after
+        the fact."""
+
+        algorithms_group = parent.add_argument_group('Algorithm Parameters')
+        algorithms_group.add_argument(
             '-sha3', dest='hash_family', action='store_true',
-            help="Use SHA-3 (fixed length) instead of SHA-2.  Bit length is \
-            determined automatically based on digest processed through -d switch")
+            help="""Use SHA-3 (fixed length) instead of SHA-2.""")
 
-        opt_group.add_argument(
+        algorithms_group.add_argument(
             '-shake128', dest='hash_family', nargs=1, metavar='LENGTH',
             help="Use SHA-3's SHAKE-128 with following LENGTH")
 
-        opt_group.add_argument(
+        algorithms_group.add_argument(
             '-shake256', dest='hash_family', nargs=1, metavar='LENGTH',
             help="Use SHA-3's SHAKE-256 with following LENGTH")
 
-        opt_group.add_argument(
+        algorithms_group.add_argument(
             '-blake2', dest='hash_family', nargs='+', metavar="s|b **kwargs",
-            help="Acts as a wrapper for python's hashlib.blake2s() and \
-            hashlib.blake2b() methods. The only required paramater is the \
+            help=""""Acts as a wrapper for python's hashlib.blake2s() and \
+            hashlib.blake2b() methods. The only required parameter is the \
             desired BLAKE2 version: s|b -- Although this switch can be \
             used as without any kwargs, default values can be overridden using \
             kwargs found in python3's documentation for BLAKE2s EXCEPT data, \
-            which is provided already through the -bin switch.")
+            which is provided already through the -bin switch.""")
 
-        opt_group.add_argument(
+        algorithms_group.add_argument(
             '--insecure', metavar='NAME', choices=['md5', 'sha1'],
             help="""WARNING: MD5 and SHA1 are insecure hash algorithms; they \
             should only be used to check for unintentional data corruption. \
             You can force use of one of these two methods by using this switch \
             along with the hash algorithm name.""")
+
 
     def get_parser_args(self):
         """Returns arguments parsed by main argparse object"""
