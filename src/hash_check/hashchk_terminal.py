@@ -6,12 +6,13 @@ import argparse
 import colorama
 import hashchk
 
-"""Classes and functions for hashchk terminal use"""
+"""Classes and functions for hashchk.py terminal use
 
+Todo:
+    * Re-implement SHAKE and BLAKE arguments
+    * More tests on what arguments common argument groups return
 
-# TODO: Re-implement shake and blake
-# TODO: More tests on what arguments common argument groups return
-
+"""
 
 class HashChkParser(object):
     """Class for creating and assembling argparse object used in hashchk.py"""
@@ -66,7 +67,7 @@ class HashChkParser(object):
             on the length of the provided digest.""")
 
         algorithms_group.add_argument(
-            '--insecure', metavar='NAME', dest='hash_family', choices=['md5', 'sha1'],
+            '--insecure', metavar='md5|sha1', dest='hash_family', choices=['md5', 'sha1'],
             help="""WARNING: MD5 and SHA1 are insecure hash algorithms; they \
             should only be used to check for unintentional data corruption. \
             You can force use of one of these two methods by using this switch \
@@ -93,14 +94,17 @@ class Output(object):
     def print_comparison_results(comparison_result):
         """Prints out results of comparison between two hash digests"""
 
+        GREEN, RED = colorama.Fore.GREEN, colorama.Fore.RED
+        BRIGHT, RESET = colorama.Style.BRIGHT, colorama.Style.RESET_ALL
+
         if comparison_result:
-            print("\n {}{}SUCCESS: Digests Match{}{}\n".format(
-                "---------------------------", colorama.Fore.GREEN,
-                colorama.Style.RESET_ALL, "----------------------------"))
+            print("\n {}{}{}SUCCESS: Digests Match{}{}\n".format(
+                "---------------------------", BRIGHT, GREEN,
+                RESET, "----------------------------"))
         else:
-            print("\n {}{}FAIL: Digests DO NOT Match{}{}\n".format(
-                "************************", colorama.Fore.RED,
-                colorama.Style.RESET_ALL, "*************************"))
+            print("\n {}{}{}FAIL: Digests DO NOT Match{}{}\n".format(
+                "************************", BRIGHT, RED,
+                RESET, "*************************"))
 
 
 def _compare_verify_digests(verify_args):
@@ -108,10 +112,11 @@ def _compare_verify_digests(verify_args):
     out comparison results."""
 
     Output.print_comparison_startup()
-    digest = hashchk.Digest(hash_family=verify_args.hash_family)
+    digest = hashchk.Digest(
+        hash_family=verify_args.hash_family, reference_digest=verify_args.digest)
 
     # provided printout
-    provided_digest = digest.process_digest(verify_args.digest)
+    provided_digest = digest.reference_digest
     print(" Provided :{}".format(provided_digest))
 
     # stdout used to provide status message while digest is being generated
@@ -127,5 +132,6 @@ def _compare_verify_digests(verify_args):
 if __name__ == '__main__':
     os.system('cls')
     colorama.init(convert=True)
+
     args = HashChkParser().get_parser_args()
     _compare_verify_digests(args)
