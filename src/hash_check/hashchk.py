@@ -82,10 +82,6 @@ class Digest(object):
     def get_hash_method(self):
         """Returns method to be used for digest comparison
 
-        Args:
-            sha_digest (str, optional): SHA2/SHA3 digest to be dispatched
-                against sha_methods dictionary.
-
         Returns:
             str: Exact name of built-in hashlib method as a string.
         """
@@ -107,11 +103,12 @@ class Digest(object):
                 will result in a comparison fail, but output formatting will
                 show the length difference"""
 
-                deviations = [(abs(x-reference_length), x) for x in family.keys()]
+                deviations = [(abs(x - reference_length), x) for x in family.keys()]
                 return family[min(deviations)[1]]
 
         elif self.hash_family in ['md5', 'sha1']:
             return self.hash_family
+
 
 def compare_digests(digest_1, digest_2):
     """Returns result of equality comparison between digest_1 and digest_2.
