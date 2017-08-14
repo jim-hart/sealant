@@ -4,6 +4,7 @@ import os
 import sys
 import argparse
 import colorama
+import difflib
 import hashchk
 
 """Classes and functions for hashchk.py terminal use
@@ -13,6 +14,7 @@ Todo:
     * More tests on what arguments common argument groups return
 
 """
+
 
 class HashChkParser(object):
     """Class for creating and assembling argparse object used in hashchk.py"""
@@ -73,6 +75,13 @@ class HashChkParser(object):
             You can force use of one of these two methods by using this switch \
             along with the hash algorithm name.""")
 
+        # Output choices
+        output_group = verify_parser.add_argument_group('Output Options')
+        output_group.add_argument(
+            '-diff', dest='diff', action='store_true',
+            help="Print differences (if any) between digests")
+
+
     def get_parser_args(self):
         """Returns arguments parsed by main argparse object"""
 
@@ -81,6 +90,9 @@ class HashChkParser(object):
 
 class Output(object):
     """Organizational class for reusable printout messages"""
+    C = colorama
+    GREEN, RED, CYAN = C.Fore.GREEN, C.Fore.RED, C.Fore.CYAN
+    BRIGHT, RESET = C.Style.BRIGHT, C.Style.RESET_ALL
 
     @staticmethod
     def print_comparison_startup():
@@ -90,21 +102,40 @@ class Output(object):
             "--------------------------------",
             "--------------------------------"))
 
-    @staticmethod
-    def print_comparison_results(comparison_result):
+    @classmethod
+    def print_comparison_results(cls, comparison_result):
         """Prints out results of comparison between two hash digests"""
-
-        GREEN, RED = colorama.Fore.GREEN, colorama.Fore.RED
-        BRIGHT, RESET = colorama.Style.BRIGHT, colorama.Style.RESET_ALL
 
         if comparison_result:
             print("\n {}{}{}SUCCESS: Digests Match{}{}\n".format(
-                "---------------------------", BRIGHT, GREEN,
-                RESET, "----------------------------"))
+                "---------------------------", cls.BRIGHT, cls.GREEN,
+                cls.RESET, "----------------------------"))
         else:
             print("\n {}{}{}FAIL: Digests DO NOT Match{}{}\n".format(
-                "************************", BRIGHT, RED,
-                RESET, "*************************"))
+                "************************", cls.BRIGHT, cls.RED,
+                cls.RESET, "*************************"))
+
+    @staticmethod
+    def print_diffs(digest_1, digest_2, tags=None):
+        diffs = list(difflib.ndiff([digest_1], [digest_2]))
+        diffs = [line.replace('\n', '') for line in diffs]
+        titles = tags or ['Digest1', 'Digest2']
+
+
+        print("\n{}Diffs{}\n".format(
+            "------------------------------------",
+            "------------------------------------"))
+
+        padding = max(len(title) for title in titles)
+        for index, diff in enumerate(diffs):
+            if index in [0, 2]:
+                print("{:{pad}}: {}".format(titles.pop(0), diff, pad=padding))
+            else:
+                print("{:{pad}}  {}".format(" ", diff, pad=padding))
+
+        print("\n{}End{}\n".format(
+            "-------------------------------------",
+            "-------------------------------------"))
 
 
 def _compare_verify_digests(verify_args):
@@ -127,6 +158,10 @@ def _compare_verify_digests(verify_args):
     # Compare and printout results
     result = hashchk.compare_digests(provided_digest, generated_digest)
     Output.print_comparison_results(result)
+
+    if verify_args.diff:
+        Output.print_diffs(
+            provided_digest, generated_digest, ['Provided', 'Generated'])
 
 
 if __name__ == '__main__':
