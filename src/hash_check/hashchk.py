@@ -16,39 +16,35 @@ import hmac  # Python 2.7 and 3.3+
 
 # TODO: Implement SHAKE and BLAKE
 # TODO: Resist urge to call it "SHAKE'N BLAKE"
+# TODO: Allow user to pass get_hash_method string of hashlib hexdigest call
 
 class Digest(object):
     """Class for comparing, processing, and generating hash digests."""
 
     def __init__(self, hash_family):
-        self.family = hash_family
+        self.hash_family = hash_family
 
-    def build_hash_object(self, digest):
+    def get_hash_method(self, sha_digest=None):
         """Returns SHA method to be used for digest comparison
 
         Args:
-            digest (str): user provided hexdigest used to determine sha method
-            family (str, optional): determines sha2 vs sha3 usage
+            sha_digest (str): user provided hex-digest used to determine SHA method
 
         Returns:
-            object: built in hashlib method built from sha_variants dictionary
+            str: exact name of built in hashlib method as a string
         """
 
-        fixed_variants = {
+        hash_methods = {
             'sha2': {56: 'sha224', 64: 'sha256', 96: 'sha384', 128: 'sha512'},
             'sha3': {56: 'sha3_224', 64: 'sha3_256', 96: 'sha3_384', 128: 'sha3_512'}
         }
 
-        dynamic_variants = {
-            'shake': {'128': 'shake_128', '256': 'shake_256'},
-            'blake': {'2s': 'blake2s', '2b': 'blake2b'}
-        }
+        insecure_methods = ['md5', 'sha1']
 
-        if self.family in fixed_variants:
-            variant = fixed_variants[self.family][len(digest)]
-
-        return getattr(hashlib, variant)
-
+        if self.hash_family not in insecure_methods:
+            return hash_methods[self.hash_family][len(sha_digest)]
+        else:
+            return self.hash_family
 
     @staticmethod
     def process_digest(digest):
@@ -68,8 +64,7 @@ class Digest(object):
         else:
             return digest.strip()
 
-    @staticmethod
-    def generate_digest(filename):
+    def generate_digest(self, filename):
         """Returns hexadecimal digest generated from filename
 
         Args:
@@ -82,15 +77,15 @@ class Digest(object):
         buffer_size = 65536  # Buffer used to cut down on memory for large files.
         blocks = (os.path.getsize(filename) // buffer_size) + 1
 
-        hash_digest = hashlib.sha256()
+        hash_object = getattr(hashlib, self.get_hash_method())()
 
         with open(filename, 'rb') as f:
             # generator expression used for reading file in chunks
             generator = (f.read(buffer_size) for _ in range(blocks))
             for data in generator:
-                hash_digest.update(data)
+                hash_object.update(data)
 
-        return hash_digest.hexdigest()
+        return hash_object.hexdigest()
 
 
 def compare_digests(digest_1, digest_2):
@@ -107,7 +102,5 @@ def compare_digests(digest_1, digest_2):
     return hmac.compare_digest(digest_1, digest_2)
 
 
-
-
 if __name__ == '__main__':
-    print(hashlib.blake2b.__dict__.keys())
+    pass
