@@ -1,3 +1,11 @@
+"""Classes and functions for creating and comparing hash digests
+
+Todo:
+    * Implement SHAKE and BLAKE
+    * Resist urge to call it "SHAKE'N BLAKE"
+    * Allow user to pass get_hash_method string of hashlib hexdigest call
+"""
+
 # ----------------------------Compatibility Imports----------------------------
 from __future__ import print_function
 from six.moves import range
@@ -12,14 +20,6 @@ if sys.version_info < (3, 6):
 
 import os
 import hmac
-
-"""Classes and functions for creating and comparing hash digests
-
-Todo:
-    * Implement SHAKE and BLAKE
-    * Resist urge to call it "SHAKE'N BLAKE"
-    * Allow user to pass get_hash_method string of hashlib hexdigest call
-"""
 
 
 class Digest(object):
@@ -66,7 +66,7 @@ class Digest(object):
             str: Hash digest generated from binary file.
         """
 
-        buffer_size = 65536  # Buffer used to cut down on memory for large files.
+        buffer_size = 65536  # buffer used to cut down on memory for large files
         blocks = (os.path.getsize(filename) // buffer_size) + 1
 
         hash_digest = getattr(hashlib, self.get_hash_method())()
@@ -94,16 +94,15 @@ class Digest(object):
 
         if self.reference_digest and (self.hash_family in sha_methods):
             family = sha_methods[self.hash_family]
-            reference_length = len(self.reference_digest)
+            digest_length = len(self.reference_digest)
             try:
-                return family[reference_length]
+                return family[digest_length]
             except KeyError:
-                """If the reference digest length doesn't match any standard SHA
-                digest output length, the 'closest' value is returned.  This
-                will result in a comparison fail, but output formatting will
-                show the length difference"""
+                """KeyError results from incorrect digest entry.  If this
+                happens, the 'closest' sha-method is returned.  Printout of the
+                comparison results will highlight this error."""
 
-                deviations = [(abs(x - reference_length), x) for x in family.keys()]
+                deviations = [(abs(x - digest_length), x) for x in family]
                 return family[min(deviations)[1]]
 
         elif self.hash_family in ['md5', 'sha1']:
@@ -111,11 +110,8 @@ class Digest(object):
 
 
 def compare_digests(digest_1, digest_2):
-    """Returns result of equality comparison between digest_1 and digest_2.
-
-    Args:
-        digest_1 (str): Digest to be compared against digest_2.
-        digest_2 (str): Digest to be compared against digest_1.
+    """Returns result of equality comparison between strings digest_1 and
+    digest_2.
 
     Returns:
         bool: Result of comparison of digest_1 and digest_2.
