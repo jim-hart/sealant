@@ -6,6 +6,7 @@ Todo:
     * More tests on what arguments common argument groups return
 
 """
+
 from __future__ import print_function
 import os
 import sys
@@ -101,23 +102,42 @@ class HashChkParser(object):
         return self.parser.parse_args()
 
 
-class Output(object):
-    """Organizational class for reusable printout messages."""
+class Terminal(object):
+    """Class for reusable and dynamic output messages
 
-    GREEN, RED, CYAN = Fore.GREEN, Fore.RED, Fore.CYAN
-    BRIGHT, RESET = Style.BRIGHT, Style.RESET_ALL
+    Attributes:
+        width (int, optional): Length of digest plus predefined padding length
+            of 7 to account for digest source prefix (i.e. provided vs
+            generated).
+    """
 
-    @staticmethod
-    def print_comparison_startup():
-        """Prints out startup message for comparison process
+    def __init__(self, digest_length=None):
+        self.width = (67 or digest_length) + 7
+
+    def build_line_break(self, header, line_char='-', color=None):
+        """Dynamically generates visual line breaks by padding a centered header
+        with some type of punctuation('-' by default).  Left/right padding
+        length is determined by self.width attribute.
+
+        Args:
+            header (str): Text to be centered
+            line_char (str, optional): Character used to pad header with
+            color (None, optional): color highlighting for header
+
+        Returns:
+            str: formatted string padded left/right with a repeating character
         """
 
-        print("\n {}Comparing Now{}\n".format(
-            "--------------------------------",
-            "--------------------------------"))
+        size = self.width - len(header)
+        highlight = getattr(Fore, color.upper()) if color else ''
 
-    @classmethod
-    def print_comparison_results(cls, comparison_result):
+        left_line = ''.join(line_char for _ in range(size // 2))
+        right_line = ''.join(line_char for _ in range(size - (size // 2)))
+
+        tag = "{}{}{}".format(highlight + Style.BRIGHT, header, Style.RESET_ALL)
+        return " {}{}{}".format(left_line, tag, right_line)
+
+    def print_comparison_results(self, comparison_result):
         """Prints out results of comparison between two hash digests
 
         Args:
@@ -125,43 +145,37 @@ class Output(object):
         """
 
         if comparison_result:
-            print("\n {}{}{}SUCCESS: Digests Match{}{}\n".format(
-                "---------------------------", cls.BRIGHT, cls.GREEN,
-                cls.RESET, "----------------------------"))
-        else:
-            print("\n {}{}{}FAIL: Digests DO NOT Match{}{}\n".format(
-                "************************", cls.BRIGHT, cls.RED,
-                cls.RESET, "*************************"))
+            print("\n{}\n".format(
+                self.build_line_break('SUCCESS: Digests Match', color='green')))
 
-    @staticmethod
-    def print_diffs(digest_1, digest_2, identifiers=None):
-        """Summary
+        else:
+            print("\n{}\n".format(self.build_line_break(
+                'FAIL: Digests DO NOT Match', line_char='*', color='red')))
+
+    def print_diffs(self, d1, d2, identifiers=None):
+        """Prints out `diff` style differences between two strings
 
         Args:
-            digest_1 (str): 1 of 2 digests used for diff comparison
-            digest_2 (str): 2 of 2 digests used for diff comparison
+            d1 (str): 1 of 2 digests used for diff comparison
+            d2 (str): 2 of 2 digests used for diff comparison
             identifiers (list[str], optional): Prefix titles to distinguish
                 digests apart
         """
 
-        diffs = list(difflib.Differ().compare([digest_1+'\n'], [digest_2+'\n']))
+        diffs = list(difflib.Differ().compare([d1 + '\n'], [d2 + '\n']))
         titles = identifiers or ['Digest1', 'Digest2']
 
-        print("\n{}Diffs{}\n".format(
-            "------------------------------------",
-            "------------------------------------"))
+        print("\n{}\n".format(self.build_line_break('Diffs')))
 
         padding = max(len(title) for title in titles)
         for index, line in enumerate(diffs):
             if index in [0, 2]:
-                sys.stdout.write("{:{p}}: {}".format(
+                sys.stdout.write(" {:{p}}: {}".format(
                     titles.pop(0), line, p=padding))
             else:
-                sys.stdout.write("{:{p}}  {}".format(" ", line, p=padding))
+                sys.stdout.write(" {:{p}}  {}".format(" ", line, p=padding))
 
-        print("{}End{}\n".format(
-            "-------------------------------------",
-            "-------------------------------------"))
+        print("{}\n".format(self.build_line_break('End')))
 
 
 def _compare_verify_digests(verify_args):
@@ -172,9 +186,11 @@ def _compare_verify_digests(verify_args):
         verify_args (:obo:`Namespace`): All arguments parsed from HashChkParser
     """
 
-    Output.print_comparison_startup()
     digest = hashchk.Digest(
         hash_family=verify_args.hash_family, reference_digest=verify_args.digest)
+
+    output = Terminal(digest_length=len(digest.reference_digest))
+    print("\n{}\n".format(output.build_line_break('Comparing Now')))
 
     # provided printout
     provided_digest = digest.reference_digest
@@ -187,16 +203,16 @@ def _compare_verify_digests(verify_args):
 
     # Compare and printout results
     result = hashchk.compare_digests(provided_digest, generated_digest)
-    Output.print_comparison_results(result)
+    output.print_comparison_results(result)
 
-    if verify_args.diff:
-        Output.print_diffs(
+    if verify_args.diff and not result:
+        output.print_diffs(
             provided_digest, generated_digest, ['Provided', 'Generated'])
 
 
 if __name__ == '__main__':
     os.system('cls')
-    init(convert=True)  # colorama module
+    init(convert=True)  # colorama package
 
     args = HashChkParser().get_parser_args()
     _compare_verify_digests(args)
