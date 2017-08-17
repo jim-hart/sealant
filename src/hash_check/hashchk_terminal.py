@@ -1,20 +1,28 @@
 """Classes and functions for hashchk.py terminal use
 
 Todo:
-    * Finish adding doc strings
     * Re-implement SHAKE and BLAKE arguments
     * More tests on what arguments common argument groups return
+    * Add property decorators
 
 """
 
+# ----------------------------Compatibility Imports----------------------------
 from __future__ import print_function
+from six.moves import range
+# -----------------------------------------------------------------------------
+
 import os
 import sys
 import argparse
 import difflib
 
-from colorama import (Fore, Style, init)
+import colorama
 import hashchk
+
+# ANSI escape sequences provided by colorama
+RED, GREEN, CYAN = colorama.Fore.RED, colorama.Fore.GREEN, colorama.Fore.CYAN
+BRIGHT, RESET_COLOR = colorama.Style.BRIGHT, colorama.Style.RESET_ALL
 
 
 class HashChkParser(object):
@@ -92,12 +100,8 @@ class HashChkParser(object):
             help="Print differences (if any) between digests")
 
     def get_parser_args(self):
-        """Returns arguments parsed by main argparse object
-
-        Returns:
-            obj: Namespace containing all arguments parsed through terminal
-
-        """
+        """Returns Namespace object containing arguments parsed by main argparse
+        object"""
 
         return self.parser.parse_args()
 
@@ -129,12 +133,12 @@ class Terminal(object):
         """
 
         size = self.width - len(header)
-        highlight = getattr(Fore, color.upper()) if color else ''
+        highlight = color if color else ''
 
         left_line = ''.join(line_char for _ in range(size // 2))
         right_line = ''.join(line_char for _ in range(size - (size // 2)))
 
-        tag = "{}{}{}".format(highlight + Style.BRIGHT, header, Style.RESET_ALL)
+        tag = "{}{}{}".format(highlight + BRIGHT, header, RESET_COLOR)
         return " {}{}{}".format(left_line, tag, right_line)
 
     def print_comparison_results(self, comparison_result):
@@ -145,12 +149,12 @@ class Terminal(object):
         """
 
         if comparison_result:
-            print("\n{}\n".format(
-                self.build_line_break('SUCCESS: Digests Match', color='green')))
+            print("\n{}\n".format(self.build_line_break(
+                header='SUCCESS: Digests Match', color=GREEN)))
 
         else:
             print("\n{}\n".format(self.build_line_break(
-                'FAIL: Digests DO NOT Match', line_char='*', color='red')))
+                header='FAIL: Digests DO NOT Match', line_char='*', color=RED)))
 
     def print_diffs(self, d1, d2, identifiers=None):
         """Prints out `diff` style differences between two strings
@@ -165,7 +169,7 @@ class Terminal(object):
         diffs = list(difflib.Differ().compare([d1 + '\n'], [d2 + '\n']))
         titles = identifiers or ['Digest1', 'Digest2']
 
-        print("\n{}\n".format(self.build_line_break('Diffs')))
+        print("\n{}\n".format(self.build_line_break(header='Diffs')))
 
         padding = max(len(title) for title in titles)
         for index, line in enumerate(diffs):
@@ -183,7 +187,7 @@ def _compare_verify_digests(verify_args):
     out comparison results.
 
     Args:
-        verify_args (:obo:`Namespace`): All arguments parsed from HashChkParser
+        verify_args (:obj:`Namespace`): All arguments parsed from HashChkParser
     """
 
     digest = hashchk.Digest(
@@ -212,7 +216,7 @@ def _compare_verify_digests(verify_args):
 
 if __name__ == '__main__':
     os.system('cls')
-    init(convert=True)  # colorama package
+    colorama.init(convert=True)
 
     args = HashChkParser().get_parser_args()
     _compare_verify_digests(args)

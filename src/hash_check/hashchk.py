@@ -3,7 +3,8 @@
 Todo:
     * Implement SHAKE and BLAKE
     * Resist urge to call it "SHAKE'N BLAKE"
-    * Allow user to pass get_hash_method string of hashlib hexdigest call
+    * Allow user to pass hash method choice explicitly to Digest.get_hash_method()
+    * Add property decorators
 """
 
 # ----------------------------Compatibility Imports----------------------------
@@ -110,12 +111,8 @@ class Digest(object):
 
 
 def compare_digests(digest_1, digest_2):
-    """Returns result of equality comparison between strings digest_1 and
-    digest_2.
-
-    Returns:
-        bool: Result of comparison of digest_1 and digest_2.
-    """
+    """Returns result (bool) of equality comparison between strings digest_1 and
+    digest_2."""
 
     return hmac.compare_digest(digest_1, digest_2)
 
