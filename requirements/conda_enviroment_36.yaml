@@ -1,0 +1,25 @@
+name: sealant
+channels:
+- defaults
+- jim-hart
+- anaconda-fusion
+- omnia
+- r
+dependencies:
+- asn1crypto=0.22.0=py36_0
+- cffi=1.10.0=py36_0
+- cryptography=1.8.1=py36_0
+- idna=2.5=py36_0
+- openssl=1.0.2l=vc14_0
+- packaging=16.8=py36_0
+- pip=9.0.1=py36_1
+- pycparser=2.17=py36_0
+- pyparsing=2.1.4=py36_0
+- python=3.6.1=2
+- setuptools=27.2.0=py36_1
+- six=1.10.0=py36_0
+- vs2015_runtime=14.0.25420=0
+- wheel=0.29.0=py36_0
+- pyperclip=1.5.27=py36_0
+prefix: Q:\Anaconda\envs\sealant
+
