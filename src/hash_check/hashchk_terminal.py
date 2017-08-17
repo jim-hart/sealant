@@ -34,8 +34,6 @@ class HashChkParser(object):
     """
 
     def __init__(self):
-        """Summary
-        """
         self.parser = self.create_parser()
         self.subparser = self.create_subparser()
 
@@ -43,14 +41,14 @@ class HashChkParser(object):
 
     @staticmethod
     def create_parser():
-        """Creates and returns main parser object used for all argparse
+        """Returns main parser object used for all argparse
         arguments."""
 
         return argparse.ArgumentParser(
             description="Generate and compare hash digests")
 
     def create_subparser(self):
-        """Creates and returns main subparser derived from self.parser."""
+        """Returns main subparser derived from self.parser."""
 
         return self.parser.add_subparsers(
             title="Commands", description="Available Actions")
@@ -99,7 +97,8 @@ class HashChkParser(object):
             '-diff', dest='diff', action='store_true',
             help="Print differences (if any) between digests")
 
-    def get_parser_args(self):
+    @property
+    def args(self):
         """Returns Namespace object containing arguments parsed by main argparse
         object"""
 
@@ -218,5 +217,4 @@ if __name__ == '__main__':
     os.system('cls')
     colorama.init(convert=True)
 
-    args = HashChkParser().get_parser_args()
-    _compare_verify_digests(args)
+    _compare_verify_digests(HashChkParser().args)
