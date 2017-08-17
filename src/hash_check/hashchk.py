@@ -1,3 +1,12 @@
+"""Classes and functions for creating and comparing hash digests
+
+Todo:
+    * Implement SHAKE and BLAKE
+    * Resist urge to call it "SHAKE'N BLAKE"
+    * Allow user to pass hash method choice explicitly to Digest.get_hash_method()
+    * Add property decorators
+"""
+
 # ----------------------------Compatibility Imports----------------------------
 from __future__ import print_function
 from six.moves import range
@@ -11,93 +20,99 @@ if sys.version_info < (3, 6):
 # -----------------------------------------------------------------------------
 
 import os
-import hmac  # Python 2.7 and 3.3+
+import hmac
 
-
-# TODO: Implement SHAKE and BLAKE
-# TODO: Resist urge to call it "SHAKE'N BLAKE"
-# TODO: Allow user to pass get_hash_method string of hashlib hexdigest call
 
 class Digest(object):
-    """Class for comparing, processing, and generating hash digests."""
+    """Class for comparing, processing, and generating hash digests.
 
-    def __init__(self, hash_family):
+    Attributes:
+        hash_family (str): Designates which hash family/version will be used to
+            generate a digest from a binary.
+        reference_digest (str, optional):  Digest used to deduce SHA2/SHA3 bit
+            length-e.g., SHA224 vs SHA226. This is primarily used for comparing a
+            master digest of a binary against a local copy.
+    """
+
+    def __init__(self, hash_family, reference_digest=None):
         self.hash_family = hash_family
-
-    def get_hash_method(self, sha_digest=None):
-        """Returns SHA method to be used for digest comparison
-
-        Args:
-            sha_digest (str): user provided hex-digest used to determine SHA method
-
-        Returns:
-            str: exact name of built in hashlib method as a string
-        """
-
-        hash_methods = {
-            'sha2': {56: 'sha224', 64: 'sha256', 96: 'sha384', 128: 'sha512'},
-            'sha3': {56: 'sha3_224', 64: 'sha3_256', 96: 'sha3_384', 128: 'sha3_512'}
-        }
-
-        insecure_methods = ['md5', 'sha1']
-
-        if self.hash_family not in insecure_methods:
-            return hash_methods[self.hash_family][len(sha_digest)]
-        else:
-            return self.hash_family
+        if reference_digest:
+            self.reference_digest = self.process_digest(reference_digest)
 
     @staticmethod
-    def process_digest(digest):
+    def process_digest(source):
         """Determines if source of digest is stored in a text file, or if it's a
         string provided by user.
 
         Args:
-            digest (str): filename or string containing digest to be processed
+            source (str): Filename or string containing source to be processed.
 
         Returns:
-            str: hash digest stripped of leading and trailing whitespace
+            str: Hash source digest stripped of leading and trailing whitespace.
         """
 
-        if os.path.isfile(digest):
-            with open(digest, 'r') as f:
+        if os.path.isfile(source):
+            with open(source, 'r') as f:
                 return f.read().split(' ')[0]
         else:
-            return digest.strip()
+            return source.strip()
 
     def generate_digest(self, filename):
         """Returns hexadecimal digest generated from filename
 
         Args:
-            filename (str): filename of binary file
+            filename (str): Filename of binary file.
 
         Returns:
-            str: hash digest generated from binary file
+            str: Hash digest generated from binary file.
         """
 
-        buffer_size = 65536  # Buffer used to cut down on memory for large files.
+        buffer_size = 65536  # buffer used to cut down on memory for large files
         blocks = (os.path.getsize(filename) // buffer_size) + 1
 
-        hash_object = getattr(hashlib, self.get_hash_method())()
+        hash_digest = getattr(hashlib, self.get_hash_method())()
 
         with open(filename, 'rb') as f:
             # generator expression used for reading file in chunks
             generator = (f.read(buffer_size) for _ in range(blocks))
             for data in generator:
-                hash_object.update(data)
+                hash_digest.update(data)
 
-        return hash_object.hexdigest()
+        return hash_digest.hexdigest()
+
+    def get_hash_method(self):
+        """Returns method to be used for digest comparison
+
+        Returns:
+            str: Exact name of built-in hashlib method as a string.
+        """
+
+        # Method can be deduced by digest length if SHA2/SHA3 digest provided
+        sha_methods = {
+            'sha2': {56: 'sha224', 64: 'sha256', 96: 'sha384', 128: 'sha512'},
+            'sha3': {56: 'sha3_224', 64: 'sha3_256', 96: 'sha3_384', 128: 'sha3_512'}
+        }
+
+        if self.reference_digest and (self.hash_family in sha_methods):
+            family = sha_methods[self.hash_family]
+            digest_length = len(self.reference_digest)
+            try:
+                return family[digest_length]
+            except KeyError:
+                """KeyError results from incorrect digest entry.  If this
+                happens, the 'closest' sha-method is returned.  Printout of the
+                comparison results will highlight this error."""
+
+                deviations = [(abs(x - digest_length), x) for x in family]
+                return family[min(deviations)[1]]
+
+        elif self.hash_family in ['md5', 'sha1']:
+            return self.hash_family
 
 
 def compare_digests(digest_1, digest_2):
-    """Returns result of equality comparison between digest_1 and digest_2.  Included
-
-    Args:
-        digest_1 (str): digest to be compared against digest_2
-        digest_2 (str): digest to be compared against digest_1
-
-    Returns:
-        bool: result of comparison of digest_1 and digest_2
-    """
+    """Returns result (bool) of equality comparison between strings digest_1 and
+    digest_2."""
 
     return hmac.compare_digest(digest_1, digest_2)
 
