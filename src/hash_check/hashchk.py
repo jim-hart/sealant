@@ -30,8 +30,8 @@ class Digest(object):
         hash_family (str): Designates which hash family/version will be used to
             generate a digest from a binary.
         reference_digest (str, optional):  Digest used to deduce SHA2/SHA3 bit
-            length-e.g., SHA224 vs SHA226. This is primarily used for comparing a
-            master digest of a binary against a local copy.
+            length-e.g., SHA224 vs SHA226. This is primarily used for comparing
+            a master digest of a binary against a local copy.
     """
 
     def __init__(self, hash_family, reference_digest=None):
@@ -70,7 +70,7 @@ class Digest(object):
         buffer_size = 65536  # buffer used to cut down on memory for large files
         blocks = (os.path.getsize(filename) // buffer_size) + 1
 
-        hash_digest = getattr(hashlib, self.get_hash_method())()
+        hash_digest = getattr(hashlib, self.hash_method)()
 
         with open(filename, 'rb') as f:
             # generator expression used for reading file in chunks
@@ -80,7 +80,8 @@ class Digest(object):
 
         return hash_digest.hexdigest()
 
-    def get_hash_method(self):
+    @property
+    def hash_method(self):
         """Returns method to be used for digest comparison
 
         Returns:
