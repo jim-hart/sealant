@@ -3,7 +3,8 @@
 Todo:
     * Re-implement SHAKE and BLAKE arguments
     * More tests on what arguments common argument groups return
-    * Add property decorators
+    * Generate command
+    * Compare command
 """
 
 # ----------------------------Compatibility Imports----------------------------
@@ -33,27 +34,15 @@ class HashChkParser(object):
     """
 
     def __init__(self):
-        self.parser = self.create_parser()
-        self.subparser = self.create_subparser()
-
-        self.add_verify_subparser()
-
-    @staticmethod
-    def create_parser():
-        """Returns main parser object used for all argparse
-        arguments."""
-
-        return argparse.ArgumentParser(
+        self.parser = argparse.ArgumentParser(
             description="Generate and compare hash digests")
-
-    def create_subparser(self):
-        """Returns main subparser derived from self.parser."""
-
-        return self.parser.add_subparsers(
+        self.subparser = self.parser.add_subparsers(
             title="Commands", description="Available Actions")
 
-    def add_verify_subparser(self):
-        """Creates the 'verify' subparser and adds related arguments."""
+        self.add_verify_command()
+
+    def add_verify_command(self):
+        """Adds verify command and arguments to parent subparser object."""
 
         verify_parser = self.subparser.add_parser(
             'verify',
@@ -177,7 +166,7 @@ class Terminal(object):
             else:
                 sys.stdout.write(" {:{p}}  {}".format(" ", line, p=padding))
 
-        print("{}\n".format(self.build_line_break('End')))
+        print("{}\n".format(self.build_line_break(header='End')))
 
 
 def _compare_verify_digests(verify_args):
@@ -192,7 +181,7 @@ def _compare_verify_digests(verify_args):
         hash_family=verify_args.hash_family, reference_digest=verify_args.digest)
 
     output = Terminal(digest_length=len(digest.reference_digest))
-    print("\n{}\n".format(output.build_line_break('Comparing Now')))
+    print("\n{}\n".format(output.build_line_break(header='Comparing Now')))
 
     # provided printout
     provided_digest = digest.reference_digest
