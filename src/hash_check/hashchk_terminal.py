@@ -4,7 +4,6 @@ Todo:
     * Re-implement SHAKE and BLAKE arguments
     * More tests on what arguments common argument groups return
     * Add property decorators
-
 """
 
 # ----------------------------Compatibility Imports----------------------------
