@@ -2,8 +2,16 @@
 methods.
 
 Todo:
-    * Add some kind of safety check to ensure os brick-leveling strings aren't
+    * Add some kind of safety check to ensure OS brick-leveling strings aren't
       created because of typo in length argument
+    * Add feature to allow piping randomly generated string out of randstr
+      itself.  Current printout of randomized string includes too much extra
+      formatting to make piping useful.
+    * Remove "Output:" prefix when -p switch is used
+    * Look into adding switch that allows character set to be built from ASCII
+      attributes found in string module.  This would allow user to quickly
+      override default character set with basic sub-sets like 'only lowercase
+      letters', or 'all lower-case, upper-case, and digits'.
 
 """
 

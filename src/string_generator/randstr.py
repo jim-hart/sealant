@@ -86,10 +86,10 @@ class RandomString(object):
     @property
     def default_char_set(self):
         """Returns string containing ASCII lower case, upper case, and
-        punctuation containers (along with a character space as well)."""
+        punctuation characters, and a single character space."""
 
-        return ''.join(
-            char for char in string.printable if char not in '\t\n\r\f\v')
+        # Note character space at the end
+        return '{s.ascii_letters}{s.digits}{s.punctuation} '.format(s=string)
 
 
 if __name__ == '__main__':
