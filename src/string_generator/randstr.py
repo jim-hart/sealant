@@ -2,21 +2,19 @@
 
 from __future__ import print_function
 from six.moves import range
+
+import importlib
 import string
-
-# -----------------------------Randomization Method----------------------------
-"""SystemRandom access determined by python interpreter version.  Python 3.6+
-uses secrets module while all other versions use random.SystemRandom().
-Additional details can be found in README."""
-
 import random
 
+"""Cryptographically secure random numbers are generated using SystemRandom
+class.  The secrets module has a secrets.SystemRandom class, but this is just an
+alias for random.SystemRandom. It's inclusion is to to favor newer Python
+modules if available."""
 try:
-    import secrets as RAND_METHOD
+    RAND_METHOD = importlib.import_module('secrets')
 except ImportError:
     RAND_METHOD = random.SystemRandom()
-
-# -----------------------------------------------------------------------------
 
 
 class RandomString(object):
