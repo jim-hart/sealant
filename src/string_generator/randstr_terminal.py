@@ -15,8 +15,6 @@ class RandstrParser(object):
 
         self.add_parser_arguments()
 
-        self.args = self.get_parser_args()
-
     @staticmethod
     def create_parser():
         """Returns parser object used for all argparse arguments"""
@@ -25,12 +23,6 @@ class RandstrParser(object):
             description="Generate a cryptographically secure randomized string.",
             epilog="""\tDefault character set includes all ASCII upper and lower \
                    case letters, digits, punctuation, and a character space.""")
-
-    def get_parser_args(self):
-        """Calls methods that add arguments to parser objects, after which, it
-        returns arguments parsed from user input."""
-
-        return self.parser.parse_args()
 
     def add_parser_arguments(self):
         """Adds parser arguments that define characteristics of the randomly
@@ -65,8 +57,12 @@ class RandstrParser(object):
 
         random_options.parser.add_argument(
             '-s', '--shuffle', action='store_true',
-            help="""Pre-shuffle character positions in set 3-5 times \
+            help="""Pre-shuffle character positions in character set 3-5 times \
                  (randomly chosen)""")
+
+    @property
+    def args(self):
+        return self.parser.parse_args()
 
 
 def _write_file(file_data, filename):
