@@ -2,7 +2,6 @@ import os
 import sys
 import argparse
 import datetime
-import string
 
 import pyperclip
 from randstr import RandomString
@@ -39,15 +38,12 @@ class RandstrParser(object):
 
         # length
         self.parser.add_argument(
-            '-l', '--length', type=int, required=True,
+            'len', type=int, metavar='LENGTH',
             help="Length of the randomized string")
 
         # character set
-        default_charset = "".join(
-            [char for char in string.printable if char not in '\t\n\r\f\v'])
-
         self.parser.add_argument(
-            '-cs', '--characters', type=str, default=default_charset,
+            '-cs', '--character-set', type=str, default=None,
             help="""Overrides default character set with characters in the \
                  provided string""")
 
@@ -72,11 +68,9 @@ class RandstrParser(object):
             help="Copy output string to clipboard")
 
         # file output
-        filename = "output_str_{}.txt".format(
-            datetime.datetime.now().strftime('%a%d-%H%M%S'))
-
+        _time = datetime.datetime.now().strftime('%a%d-%H%M%S')
         self.parser.add_argument(
-            '-f', '--file', nargs='?', const=filename,
+            '-f', '--file', default="output_str_{}.txt".format(_time),
             help="""Write output string to .txt file in cwd; if no filename is \
                    provided, name will default to current date and time""")
 
@@ -93,10 +87,10 @@ def _write_file(file_data, filename):
 def main():
     """Main flow control for program"""
 
-    parser_args = RandStrParser().args
+    parser_args = RandstrParser().args
     randomized_string = str(
         RandomString(length=parser_args.length, shuffle=parser_args.shuffle,
-                     char_set=parser_args.characters))
+                     user_char_set=parser_args.characters))
 
     # Printout verifies if string is desired length
     print("\n{} len(randomized_string):{} {}".format(

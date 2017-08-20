@@ -6,13 +6,14 @@ Todo:
 
 from __future__ import print_function
 from six.moves import range
+import string
 
 # -----------------------------Randomization Method----------------------------
 """SystemRandom access determined by python interpreter version.  Python 3.6+
 uses secrets module while all other versions use random.SystemRandom().
 Additional details can be found in README."""
-import random
 
+import random
 try:
     import secrets as RAND_METHOD
 
@@ -29,7 +30,7 @@ class RandomString(object):
     """Class for generating random strings based on default, or user-defined
     parameters"""
 
-    def __init__(self, length, shuffle, char_set):
+    def __init__(self, length, shuffle, user_char_set):
         """
         Args:
             length (int)  -- Defines length of randomized string.
@@ -44,7 +45,7 @@ class RandomString(object):
 
         self.length = length
         self.shuffle = shuffle
-        self.char_set = char_set
+        self.char_set = user_char_set or self.default_char_set
 
     def __repr__(self):
         """Returns object instance itself as representation of randomized
@@ -55,6 +56,8 @@ class RandomString(object):
     def generate_random_string(self):
         """Returns a randomized string of either preset, or user-defined
         length."""
+
+
 
         if self.shuffle:
             self.char_set = self.shuffle_characters(list(self.char_set))
@@ -74,6 +77,10 @@ class RandomString(object):
 
         return "".join(char_set)
 
+    @property
+    def default_char_set(self):
+        return ''.join(
+            char for char in string.printable if char not in '\t\n\r\f\v')
 
 if __name__ == '__main__':
     pass
