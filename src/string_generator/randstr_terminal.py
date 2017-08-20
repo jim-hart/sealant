@@ -21,8 +21,9 @@ class RandstrParser(object):
 
         return argparse.ArgumentParser(
             description="Generate a cryptographically secure randomized string.",
-            epilog="""\tDefault character set includes all ASCII upper and lower \
-                   case letters, digits, punctuation, and a character space.""")
+            epilog="""\tDefault character set includes all ASCII upper and \
+                   lower case letters, digits, punctuation, and a character \
+                   space.""")
 
     def add_parser_arguments(self):
         """Adds parser arguments that define characteristics of the randomly
@@ -44,18 +45,21 @@ class RandstrParser(object):
 
         _time = datetime.datetime.now().strftime('%a%d-%H%M%S')
         output_options.add_argument(
-            '-f', '--file', default="output_str_{}.txt".format(_time),
+            '-f', '--file', nargs='?', const="randstr_{}.txt".format(_time),
             help="""Write output string to .txt file in cwd; if no filename is \
-                   provided, name will default to current date and time""")
+                   provided, name will default to 'randstr_DATE_TIME' with \
+                   DATE and TIME being the current datetime""")
 
         # Character set and shuffle options
-        random_options = self.parser.add_argument_group('Randomization Options')
-        random_options.add_argument(
-            '-cs', '--character-set', type=str, default=None,
+        randomization_options = self.parser.add_argument_group(
+            'Randomization Options')
+        randomization_options.add_argument(
+            '-cs', '--character-set',
+            type=str, default=None, dest='characters', metavar='STRING',
             help="""Overrides default character set with characters in the \
                  provided string""")
 
-        random_options.parser.add_argument(
+        randomization_options.add_argument(
             '-s', '--shuffle', action='store_true',
             help="""Pre-shuffle character positions in character set 3-5 times \
                  (randomly chosen)""")
@@ -79,29 +83,30 @@ def main():
 
     parser_args = RandstrParser().args
     randomized_string = str(
-        RandomString(length=parser_args.length, shuffle=parser_args.shuffle,
+        RandomString(length=parser_args.len, shuffle=parser_args.shuffle,
                      user_char_set=parser_args.characters))
 
     # Printout verifies if string is desired length
-    print("\n{} len(randomized_string):{} {}".format(
-        '-------------------------', len(randomized_string),
-        '-------------------------\n'))
+    print("\n{}Length: {}{}".format(
+        '---------------------------------', len(randomized_string),
+        '---------------------------------\n'))
 
     if parser_args.print:
         print("Output:{}\n".format(randomized_string))
 
     if parser_args.file:
-        _write_file(randomized_string, parser_args.file_output)
+        _write_file(randomized_string, parser_args.file)
 
     if parser_args.copy:
         pyperclip.copy(randomized_string)
         print("Output String copied to clipboard\n")
 
     # END ------------------------------------
-    print("{} END {}".format(
-        '------------------------------------',
-        '------------------------------------'))
+    print("{}{}".format(
+        '---------------------------------------',
+        '--------------------------------------'))
 
 
 if __name__ == '__main__':
     main()
+
