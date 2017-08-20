@@ -1,9 +1,3 @@
-"""
-Todo:
-    * Add argument groups for input/output argparse options
-    * Make length positional argument
-"""
-
 from __future__ import print_function
 from six.moves import range
 import string

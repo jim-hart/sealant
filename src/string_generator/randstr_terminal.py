@@ -12,6 +12,9 @@ class RandstrParser(object):
 
     def __init__(self):
         self.parser = self.create_parser()
+
+        self.add_parser_arguments()
+
         self.args = self.get_parser_args()
 
     @staticmethod
@@ -27,52 +30,43 @@ class RandstrParser(object):
         """Calls methods that add arguments to parser objects, after which, it
         returns arguments parsed from user input."""
 
-        self.add_input_parameters()
-        self.add_output_parameters()
-
         return self.parser.parse_args()
 
-    def add_input_parameters(self):
+    def add_parser_arguments(self):
         """Adds parser arguments that define characteristics of the randomly
         generated string"""
 
-        # length
         self.parser.add_argument(
             'len', type=int, metavar='LENGTH',
             help="Length of the randomized string")
 
-        # character set
-        self.parser.add_argument(
+        # Terminal, clipboard, and file output options
+        output_options = self.parser.add_argument_group('Output Options')
+        output_options.add_argument(
+            '-p', '--print', action='store_true',
+            help="Print output string to terminal")
+
+        output_options.add_argument(
+            '-cp', '--copy', action='store_true',
+            help="Copy output string to clipboard")
+
+        _time = datetime.datetime.now().strftime('%a%d-%H%M%S')
+        output_options.add_argument(
+            '-f', '--file', default="output_str_{}.txt".format(_time),
+            help="""Write output string to .txt file in cwd; if no filename is \
+                   provided, name will default to current date and time""")
+
+        # Character set and shuffle options
+        random_options = self.parser.add_argument_group('Randomization Options')
+        random_options.add_argument(
             '-cs', '--character-set', type=str, default=None,
             help="""Overrides default character set with characters in the \
                  provided string""")
 
-        # shuffle
-        self.parser.add_argument(
+        random_options.parser.add_argument(
             '-s', '--shuffle', action='store_true',
             help="""Pre-shuffle character positions in set 3-5 times \
                  (randomly chosen)""")
-
-    def add_output_parameters(self):
-        """Adds parser arguments that define how the randomly generated
-        string should be output"""
-
-        # terminal output
-        self.parser.add_argument(
-            '-p', '--print', action='store_true',
-            help="Print output string to terminal")
-
-        # copy output
-        self.parser.add_argument(
-            '-cp', '--copy', action='store_true',
-            help="Copy output string to clipboard")
-
-        # file output
-        _time = datetime.datetime.now().strftime('%a%d-%H%M%S')
-        self.parser.add_argument(
-            '-f', '--file', default="output_str_{}.txt".format(_time),
-            help="""Write output string to .txt file in cwd; if no filename is \
-                   provided, name will default to current date and time""")
 
 
 def _write_file(file_data, filename):
@@ -107,7 +101,7 @@ def main():
         pyperclip.copy(randomized_string)
         print("Output String copied to clipboard\n")
 
-    #  END ------------------------------------
+    # END ------------------------------------
     print("{} END {}".format(
         '------------------------------------',
         '------------------------------------'))
