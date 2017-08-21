@@ -42,11 +42,7 @@ class RandomString(object):
         self.char_set = user_char_set or self.default_char_set
 
     def __str__(self):
-        """Returns object as a printable representation of itself
-
-        Returns:
-            str: string containing randomly chosen characters
-        """
+        """Returns object as a printable representation of itself"""
 
         return self.generate_random_string()
 
