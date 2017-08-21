@@ -36,15 +36,18 @@ class RandomString(object):
             randomization process.
     """
 
-    def __init__(self, length, shuffle=False, user_char_set=None):
+    def __init__(self, length=None, shuffle=False, user_char_set=None):
         self.length = length
         self.shuffle = shuffle
         self.char_set = user_char_set or self.default_char_set
 
     def __str__(self):
-        """Returns object as a printable representation of itself"""
+        """Returns object as a printable representation of itself.  String only
+        generated if length argument provided, thus allowing individual method
+        calls without needing to first generate a string"""
 
-        return self.generate_random_string()
+        if self.length:
+            return self.generate_random_string()
 
     def generate_random_string(self):
         """Builds randomized string based on instance attributes
@@ -87,4 +90,5 @@ class RandomString(object):
 
 
 if __name__ == '__main__':
-    pass
+    stng = RandomString(length=6)
+    print(stng.default_char_set)
