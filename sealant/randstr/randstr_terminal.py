@@ -111,23 +111,24 @@ def _write_file(file_data, filename):
 def main():
     """Main flow control for program"""
 
-    parser_args = RandstrParser().args
-    randomized_string = str(
-        randstr.RandomString(length=parser_args.len, shuffle=parser_args.shuffle,
-                     user_char_set=parser_args.characters))
+    args = RandstrParser().args
+    string_generator = RandomString(
+        length=args.len, shuffle=args.shuffle, user_char_set=args.characters)
+
+    randomized_string = string_generator()
 
     # Printout verifies if string is desired length
     print("\n{}Length: {}{}".format(
         '---------------------------------', len(randomized_string),
         '---------------------------------\n'))
 
-    if parser_args.print:
+    if args.print:
         print("Output:{}\n".format(randomized_string))
 
-    if parser_args.file:
-        _write_file(randomized_string, parser_args.file)
+    if args.file:
+        _write_file(randomized_string, args.file)
 
-    if parser_args.copy:
+    if args.copy:
         pyperclip.copy(randomized_string)
         print("Output String copied to clipboard\n")
 

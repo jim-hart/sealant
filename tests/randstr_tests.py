@@ -3,9 +3,10 @@ import string
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath('../sealant/randstr')) # Ughh
+sys.path.insert(0, os.path.abspath('../sealant/randstr'))  # Ughh
 from randstr import RandomString
 from randstr_terminal import RandstrParser
+
 
 class RandomStringGeneration(unittest.TestCase):
     """Tests for RandomString class methods"""
@@ -18,7 +19,7 @@ class RandomStringGeneration(unittest.TestCase):
     def test_default_char_set(self):
         """Verify correct default character set used"""
         char_set = ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW"
-        "XYZ0123456789!\"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~ ")
+                    "XYZ0123456789!\"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~ ")
 
         self.assertEqual(RandomString().default_char_set, char_set)
 
