@@ -1,4 +1,10 @@
-"""Methods for generating cryptographically secure random strings."""
+"""Methods for generating cryptographically secure random strings.
+
+Todo:
+    * Track last generated string?
+    * Rename self.generate_random_string() once unittests complete
+
+"""
 
 from __future__ import print_function
 from six.moves import range
@@ -36,19 +42,17 @@ class RandomString(object):
             randomization process.
     """
 
-    def __init__(self, length, shuffle=False, user_char_set=None):
+    def __init__(self, length=None, shuffle=False, user_char_set=None):
         self.length = length
         self.shuffle = shuffle
         self.char_set = user_char_set or self.default_char_set
 
-    def __str__(self):
-        """Returns object as a printable representation of itself
+    def __call__(self):
+        """Allows calling RandomString() like a function for continual random
+        string generation"""
 
-        Returns:
-            str: string containing randomly chosen characters
-        """
-
-        return self.generate_random_string()
+        if self.length:
+            return str(self.generate_random_string())
 
     def generate_random_string(self):
         """Builds randomized string based on instance attributes
@@ -91,4 +95,4 @@ class RandomString(object):
 
 
 if __name__ == '__main__':
-    pass
+    print(RandomString(length=0)())

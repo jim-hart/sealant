@@ -113,7 +113,7 @@ def main():
 
     parser_args = RandstrParser().args
     randomized_string = str(
-        RandomString(length=parser_args.len, shuffle=parser_args.shuffle,
+        randstr.RandomString(length=parser_args.len, shuffle=parser_args.shuffle,
                      user_char_set=parser_args.characters))
 
     # Printout verifies if string is desired length
