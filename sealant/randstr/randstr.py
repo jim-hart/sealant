@@ -95,4 +95,4 @@ class RandomString(object):
 
 
 if __name__ == '__main__':
-    pass
+    print(RandomString(length=0)())
