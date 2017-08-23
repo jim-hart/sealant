@@ -13,7 +13,7 @@ import importlib
 import string
 import random
 
-"""Cryptographically secure random numbers are generated using SystemRandom
+""""Cryptographically secure random numbers are generated using SystemRandom
 class.  The secrets module has a secrets.SystemRandom class, but this is just an
 alias for random.SystemRandom. It's inclusion is to to favor newer Python
 modules if available."""
@@ -55,12 +55,8 @@ class RandomString(object):
             return str(self.generate_random_string())
 
     def generate_random_string(self):
-        """Builds randomized string based on instance attributes
-
-        Returns:
-            str: Random string of len:self.length built from self.char_set
-                characters
-        """
+        """Returns randomized string generated using instance attributes as
+        generation parameters"""
 
         if self.shuffle:
             self.shuffle_characters()
@@ -69,19 +65,17 @@ class RandomString(object):
             [RAND_METHOD.choice(self.char_set) for _ in range(0, self.length)])
 
     def shuffle_characters(self):
-        """Method for in-place shuffling of self.char_set between 3-5 times;
-        Shuffle count is randomly chosen.
+        """Implementation of Python's random.shuffle(), except random numbers
+        generated for shuffle process use SystemRandom() instead.
 
-        Returns:
-            None: self.char_set attribute is modified directly once character
-                indices have been shuffled.
-        """
+        Although this implementation matches random.shuffle(), pseudo-RNGs
+        produce values faster than cryptographically-secure-RNGs, making this
+        implementation 3X slower."""
 
         char_list = list(self.char_set)
-        shuffle_count = RAND_METHOD.choice(range(3, 6))
-
-        for _ in range(0, shuffle_count):
-            random.shuffle(char_list)
+        for i in range(len(char_list) - 1, 1, -1):
+            j = RAND_METHOD.randbelow(i + 1)
+            char_list[i], char_list[j] = char_list[j], char_list[i]
 
         self.char_set = ''.join(char_list)
 
