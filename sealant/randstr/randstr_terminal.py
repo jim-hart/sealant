@@ -139,4 +139,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    my_parser = RandstrParser()
+    my_parser.parser.parse_args(['-h'])

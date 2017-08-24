@@ -1,27 +1,21 @@
-"""unittests for sealant's randstr modules
-
-Todo: *setUp and tearDown methods
-
-"""
+"""unittests for sealant's randstr.RandomString class"""
 
 import unittest
-import string
 import random
 import sys
 import os
 
 sys.path.insert(0, os.path.abspath('../sealant/randstr'))  # Ughh
-from randstr import RandomString
-from randstr_terminal import RandstrParser
+import randstr
 
 
-class RandomStringGeneration(unittest.TestCase):
+class RandomStringGenerationTests(unittest.TestCase):
     """Tests for RandomString methods"""
 
     def setUp(self):
         """Defines object instance used for test cases"""
         rand_length = random.randint(10, 100)
-        self.randstr_generator = RandomString(length=rand_length)
+        self.randstr_generator = randstr.RandomString(length=rand_length)
 
         self.default_char_set = self.randstr_generator.default_char_set
         self.randstr_length = self.randstr_generator.length
@@ -78,4 +72,4 @@ class RandomStringGeneration(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(buffer=True)
