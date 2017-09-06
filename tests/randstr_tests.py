@@ -21,22 +21,25 @@ class RandomStringGenerationTests(unittest.TestCase):
         self.randstr_length = self.randstr_generator.length
         self.original_chars = self.randstr_generator.char_set
 
+        self.reference_char_set = (
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW"
+            "XYZ0123456789!\"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~ ")
+
     def test_generated_length(self):
         """Tests that randomly generated strength matches length parameter"""
         self.assertEqual(self.randstr_length, len(self.randstr_generator()))
 
     def test_default_char_set(self):
         """Verify correct default character set used"""
-        char_set = ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW"
-                    "XYZ0123456789!\"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~ ")
 
-        self.assertEqual(self.default_char_set, char_set)
+        self.assertEqual(self.default_char_set, self.reference_char_set)
 
     def test_user_char_set_generation(self):
         """Verify only user defined characters populate randomly generated
         string"""
 
-        self.randstr_generator.char_set = user_set = "abcDEF123,.;"
+        self.randstr_generator.char_set = user_set = random.sample(
+                                                    self.reference_char_set, 10)
         for char_len in range(10, 101, 10):
             return_str = self.randstr_generator()
 
