@@ -75,4 +75,5 @@ class RandomStringGenerationTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    print('Testing randstr Methods\n')
     unittest.main(buffer=True)

@@ -26,7 +26,6 @@ class RandstrParserTests(unittest.TestCase):
 
     def test_undefined_length(self):
         """Verify passing empty arguments causes system exit"""
-
         with self.assertRaises(SystemExit) as cm:
             self.parser.parse_args()
 
@@ -65,11 +64,21 @@ class RandstrParserTests(unittest.TestCase):
         args = self.parser.parse_args([self.str_len, '--file', user_filename])
         self.assertTrue(user_filename, args.file)
 
+    def test_switch_combinations(self):
+        """Verifies all available switches accepted as an argument"""
+
+        switches = ['-p', '--print', '-cp', '--copy', '-f', '--file',
+                   ('-cs', 'abc'), ('--character-set', 'abc'), '-s', '--shuffle']
+
+        args = [('1', ) + i if isinstance(i, tuple) else ('1', i) for i in  switches]
+
+        for arg in args:
+            with self.subTest(arg=arg):
+                self.assertIsNot(self.parser.parse_args(arg), None)
 
     def test_boolean_switches(self):
         """Subtests for simple switches that store as True when included as an
         argument"""
-
         switches = {'-p': 'print', '-cp': 'copy', '-s': 'shuffle'}
 
         for switch, dest in switches.items():
@@ -98,8 +107,8 @@ class FileWriteTests(unittest.TestCase):
     def tearDown(self):
         """ Removes any files/directories created during file write test
         procedures"""
-
         temp_files = os.listdir(self.test_directory)
+
         if temp_files:
             for file in temp_files:
                 os.remove(os.path.abspath(file))
@@ -109,10 +118,10 @@ class FileWriteTests(unittest.TestCase):
     def test_default_parser_file_argument(self):
         """Tests default filename assignment when no argument provided to
         parsers --file switch"""
-
         args = self.parser.parse_args([self.str_len, '--file'])
         self.assertEqual(self.default_file, args.file)
 
 
 if __name__ == '__main__':
+    print("Testing randstr_terminal Methods and Functions\n")
     unittest.main(buffer=True)
