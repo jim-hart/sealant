@@ -8,6 +8,8 @@ Todo:
       attributes found in string module.  This would allow user to quickly
       override default character set with basic sub-sets like 'only lowercase
       letters', or 'all lower-case, upper-case, and digits'.
+    * Add raw output option so file write and copy options can still be used
+
 
 """
 
@@ -67,9 +69,10 @@ class RandstrParser(object):
 
         output_options.add_argument(
             '-ro', '--raw-output', action='store_true', dest='raw_output',
-            help="""Writes only the randomized string to stdout, which makes \
-            program output suitable for piping/redirection.  Using this switch \
-            overrides any other provided output argument.""")
+            help="""Limits output to only randomized string.  Use this option \
+            if you want to pipe output elsewhere, or if you don't want \
+            additional details included in the printout.  This option \
+            replaces --print if used.""")
 
         # Character set and shuffle options
         randomization_options = self.parser.add_argument_group(
@@ -113,7 +116,7 @@ def _generate_filename():
     while os.path.isfile(os.path.abspath("randstr_{}.txt".format(count))):
         count += 1
 
-    return "randstr_{}".format(count)
+    return "randstr_{}.txt".format(count)
 
 
 def randstr_output(parsed_args):
@@ -130,8 +133,8 @@ def randstr_output(parsed_args):
 
     randomized_string = string_generator()
 
+    # Allows output to be piped and/or redirected
     if parsed_args.raw_output:
-        # Allows output to be piped and/or redirected
         sys.stdout.write(randomized_string)
 
     else:
@@ -152,7 +155,6 @@ def randstr_output(parsed_args):
             pyperclip.copy(randomized_string)
             print("\nOutput String copied to clipboard")
 
-        # END ------------------------------------
         print("\n{}{}".format(
             '---------------------------------------',
             '--------------------------------------'))

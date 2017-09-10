@@ -2,8 +2,11 @@
 
 import os
 import sys
+import shutil
 import random
 import unittest
+import tempfile
+import pyperclip
 
 sys.path.insert(0, os.path.abspath('../sealant/randstr'))  # shhh
 import randstr_terminal
@@ -88,27 +91,59 @@ class RandstrParserTests(unittest.TestCase):
                     self.assertTrue(getattr(args, dest))
 
 
-class FileWriteTests(unittest.TestCase):
-    """Tests class methods and functions that deal with file writing"""
+class RandstrOutputTests(unittest.TestCase):
+    """Test cases for randstr_terminal.randstr_output()"""
 
     def setUp(self):
-        """Sets up necessary attributes for file write tests"""
+        """Sets up default parser and test directories used during tests"""
         self.parser = randstr_terminal.RandstrParser().parser
         self.str_len = str(random.randint(10, 100))
 
-        self.test_directory = os.path.abspath('test_write_files\\')
-        os.mkdir(self.test_directory)
+        self.randstr_output = randstr_terminal.randstr_output
+
+        self.test_dir = tempfile.mkdtemp()
+        os.chdir(self.test_dir)
 
     def tearDown(self):
-        """ Removes any files/directories created during file write test
-        procedures"""
-        temp_files = os.listdir(self.test_directory)
+        """Removes any files/directories created during file write test
+        procedures."""
 
-        if temp_files:
-            for file in temp_files:
-                os.remove(os.path.abspath(file))
+        os.chdir(os.path.abspath(os.path.dirname(__file__)))
+        shutil.rmtree(self.test_dir)
 
-        os.rmdir(self.test_directory)
+    def test_raw_output(self):
+        """Tests use of --raw-output switch"""
+
+        args = self.parser.parse_args([self.str_len, '--raw-output'])
+        self.randstr_output(args)
+
+        output = sys.stdout.getvalue()
+        self.assertEqual(int(self.str_len), len(output))
+
+    def test_copy_results(self):
+        """Test that use of '--copy' switch copies string to clipboard"""
+
+        args = self.parser.parse_args([self.str_len, '--copy', '--print'])
+        self.randstr_output(args)
+
+        output = sys.stdout.getvalue()
+        clipboard_contents = pyperclip.paste()
+
+        self.assertIn(clipboard_contents, output)
+
+    def test_file_write(self):
+        """Test that randomized correctly writes to file"""
+
+        args = self.parser.parse_args([self.str_len, '--file', '--print'])
+
+        self.randstr_output(args)
+        output = sys.stdout.getvalue()
+
+        filename = os.path.join(self.test_dir, args.file)
+        with open(filename, 'r') as f:
+            random_string = f.read()
+
+        self.assertIn(random_string, output)
 
 
 if __name__ == '__main__':
