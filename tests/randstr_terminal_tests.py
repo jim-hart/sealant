@@ -4,9 +4,6 @@ import os
 import sys
 import random
 import unittest
-import datetime
-
-import freezegun
 
 sys.path.insert(0, os.path.abspath('../sealant/randstr'))  # shhh
 import randstr_terminal
@@ -86,7 +83,6 @@ class RandstrParserTests(unittest.TestCase):
                 self.assertTrue(getattr(args, dest))
 
 
-@freezegun.freeze_time('2017-01-01 12:00:00')
 class FileWriteTests(unittest.TestCase):
     """Tests class methods and functions that deal with file writing"""
 
@@ -95,8 +91,6 @@ class FileWriteTests(unittest.TestCase):
         self.parser = randstr_terminal.RandstrParser().parser
         self.str_len = str(random.randint(10, 100))
 
-        self._strftime = datetime.datetime.now().strftime('%a%d-%H%M%S')
-        self.default_file = "randstr_{}.txt".format(self._strftime)
         self.test_directory = os.path.abspath('test_write_files\\')
 
         os.mkdir(self.test_directory)
@@ -111,12 +105,6 @@ class FileWriteTests(unittest.TestCase):
                 os.remove(os.path.abspath(file))
 
         os.rmdir(self.test_directory)
-
-    def test_default_parser_file_argument(self):
-        """Tests default filename assignment when no argument provided to
-        parsers --file switch"""
-        args = self.parser.parse_args([self.str_len, '--file'])
-        self.assertEqual(self.default_file, args.file)
 
 
 if __name__ == '__main__':
