@@ -7,14 +7,13 @@ import unittest
 import datetime
 
 import freezegun
-import pyperclip
 
 sys.path.insert(0, os.path.abspath('../sealant/randstr'))  # shhh
 import randstr_terminal
 
 
 class RandstrParserTests(unittest.TestCase):
-    """Tests for Randstr's argparser methods"""
+    """Tests for Randstr's argparse methods"""
 
     def setUp(self):
         """Sets up parser object to be used for argparse.parse_args calls"""
@@ -40,7 +39,7 @@ class RandstrParserTests(unittest.TestCase):
 
     def test_character_set_argument(self):
         """Tests that user-defined character set is correctly saved (i.e.
-        identical characters and character index posistions)"""
+        identical characters and character index positions)"""
 
         user_char_set = ''.join(random.sample(
             self.reference_char_set, random.randint(10, 90)))
@@ -51,7 +50,7 @@ class RandstrParserTests(unittest.TestCase):
         self.assertEqual(user_char_set, args.characters)
 
     def test_user_defined_filename(self):
-        """Tests that user defined filename overides default filename for
+        """Tests that user defined filename overrides default filename for
         --file switch"""
 
         # valid filename characters
@@ -68,16 +67,16 @@ class RandstrParserTests(unittest.TestCase):
         """Verifies all available switches accepted as an argument"""
 
         switches = ['-p', '--print', '-cp', '--copy', '-f', '--file',
-                   ('-cs', 'abc'), ('--character-set', 'abc'), '-s', '--shuffle']
+                    ('-cs', 'abc'), ('--character-set', 'abc'), '-s', '--shuffle']
 
-        args = [('1', ) + i if isinstance(i, tuple) else ('1', i) for i in  switches]
+        args = [('1',) + i if isinstance(i, tuple) else ('1', i) for i in switches]
 
         for arg in args:
             with self.subTest(arg=arg):
                 self.assertIsNot(self.parser.parse_args(arg), None)
 
     def test_boolean_switches(self):
-        """Subtests for simple switches that store as True when included as an
+        """Sub-tests for simple switches that store as True when included as an
         argument"""
         switches = {'-p': 'print', '-cp': 'copy', '-s': 'shuffle'}
 
@@ -91,7 +90,6 @@ class RandstrParserTests(unittest.TestCase):
 class FileWriteTests(unittest.TestCase):
     """Tests class methods and functions that deal with file writing"""
 
-
     def setUp(self):
         """Sets up necessary attributes for file write tests"""
         self.parser = randstr_terminal.RandstrParser().parser
@@ -102,7 +100,6 @@ class FileWriteTests(unittest.TestCase):
         self.test_directory = os.path.abspath('test_write_files\\')
 
         os.mkdir(self.test_directory)
-
 
     def tearDown(self):
         """ Removes any files/directories created during file write test
