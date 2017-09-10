@@ -63,8 +63,9 @@ class RandstrParserTests(unittest.TestCase):
     def test_switch_combinations(self):
         """Verifies all available switches accepted as an argument"""
 
-        switches = ['-p', '--print', '-cp', '--copy', '-f', '--file',
-                    ('-cs', 'abc'), ('--character-set', 'abc'), '-s', '--shuffle']
+        switches = ['-p', '--print', '-cp', '--copy', '-f', '--file', '-ro',
+                    '--raw-output', ('-cs', 'abc'), ('--character-set', 'abc'),
+                    '-s', '--shuffle']
 
         args = [('1',) + i if isinstance(i, tuple) else ('1', i) for i in switches]
 
@@ -75,12 +76,16 @@ class RandstrParserTests(unittest.TestCase):
     def test_boolean_switches(self):
         """Sub-tests for simple switches that store as True when included as an
         argument"""
-        switches = {'-p': 'print', '-cp': 'copy', '-s': 'shuffle'}
+        switches = {'print': ['-p', '--print'],
+                    'copy': ['-cp', '--copy'],
+                    'shuffle': ['-s', '--shuffle'],
+                    'raw_output': ['-ro', '--raw-output']}
 
-        for switch, dest in switches.items():
-            with self.subTest(switch=switch):
-                args = self.parser.parse_args([self.str_len, switch])
-                self.assertTrue(getattr(args, dest))
+        for dest, switches in switches.items():
+            for switch in switches:
+                with self.subTest(switch=switch):
+                    args = self.parser.parse_args([self.str_len, switch])
+                    self.assertTrue(getattr(args, dest))
 
 
 class FileWriteTests(unittest.TestCase):
@@ -92,7 +97,6 @@ class FileWriteTests(unittest.TestCase):
         self.str_len = str(random.randint(10, 100))
 
         self.test_directory = os.path.abspath('test_write_files\\')
-
         os.mkdir(self.test_directory)
 
     def tearDown(self):
