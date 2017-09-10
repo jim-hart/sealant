@@ -8,8 +8,6 @@ Todo:
       attributes found in string module.  This would allow user to quickly
       override default character set with basic sub-sets like 'only lowercase
       letters', or 'all lower-case, upper-case, and digits'.
-    * Add raw output option so file write and copy options can still be used
-
 
 """
 
@@ -133,10 +131,17 @@ def randstr_output(parsed_args):
 
     randomized_string = string_generator()
 
-    # Allows output to be piped and/or redirected
+    # Raw output
     if parsed_args.raw_output:
         sys.stdout.write(randomized_string)
 
+        if parsed_args.file:
+            _write_file(randomized_string, parsed_args.file)
+
+        if parsed_args.copy:
+            pyperclip.copy(randomized_string)
+
+    # Formatted output
     else:
         print("\n{}Length: {}{}".format(
             '---------------------------------', len(randomized_string),
