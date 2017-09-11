@@ -8,6 +8,7 @@ Todo:
       attributes found in string module.  This would allow user to quickly
       override default character set with basic sub-sets like 'only lowercase
       letters', or 'all lower-case, upper-case, and digits'.
+    * Rewrite randstr_output as class to imrpove flow-control
 
 """
 

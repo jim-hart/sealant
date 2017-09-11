@@ -3,11 +3,11 @@
 import os
 import sys
 import shutil
+import unittest
+import tempfile
 
 import string
 import random
-import unittest
-import tempfile
 import pyperclip
 
 sys.path.insert(0, os.path.abspath('../sealant/randstr'))  # shhh
@@ -58,7 +58,7 @@ class RandstrParserTests(unittest.TestCase):
                     '--raw-output', ('-cs', 'abc'), ('--character-set', 'abc'),
                     '-s', '--shuffle']
 
-        args = [('1',) + i if isinstance(i, tuple) else ('1', i) for i in switches]
+        args = (('1',) + i if isinstance(i, tuple) else ('1', i) for i in switches)
 
         for arg in args:
             with self.subTest(arg=arg):
@@ -184,7 +184,6 @@ class RandstrOutputStandard(unittest.TestCase):
 
         output = sys.stdout.getvalue()
         clipboard_contents = pyperclip.paste()
-
         self.assertEqual(clipboard_contents, output)
 
     def test_print_operation(self):

@@ -1,4 +1,9 @@
-"""unittests for sealant's randstr.RandomString class"""
+"""unittests for sealant's randstr.RandomString class
+
+Todo:
+    1. Add test case to check that --raw-output switch overrides --print switch
+
+"""
 
 import unittest
 import random
