@@ -99,9 +99,6 @@ def _write_file(random_string, filename):
     with open(filename, 'w') as f:
         f.write(random_string)
 
-    print("Output written to: {}\n".format(os.path.abspath(sys.argv[0])))
-
-
 def _generate_filename():
     """Generates handle used by the .txt file that will hold randomly generated
     string.
@@ -111,7 +108,7 @@ def _generate_filename():
     """
 
     count = 1
-    while os.path.isfile(os.path.abspath("randstr_{}.txt".format(count))):
+    while os.path.exists("randstr_{}.txt".format(count)):
         count += 1
 
     return "randstr_{}.txt".format(count)
@@ -140,6 +137,7 @@ def randstr_output(parsed_args):
 
         if parsed_args.copy:
             pyperclip.copy(randomized_string)
+
 
     # Formatted output
     else:

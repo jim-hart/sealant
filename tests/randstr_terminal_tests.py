@@ -1,8 +1,10 @@
-"""unittests for sealant's randstr_terminal classes and functions"""
+"""unit-tests for sealant's randstr_terminal classes and functions"""
 
 import os
 import sys
 import shutil
+
+import string
 import random
 import unittest
 import tempfile
@@ -49,20 +51,6 @@ class RandstrParserTests(unittest.TestCase):
 
         self.assertEqual(user_char_set, args.characters)
 
-    def test_user_defined_filename(self):
-        """Tests that user defined filename overrides default filename for
-        --file switch"""
-
-        # valid filename characters
-        char_set = [c for c in self.reference_char_set if c not in '\\/:*?"<>|']
-        random_name = ''.join(
-            random.choice(char_set) for _ in range(0, random.randint(10, 50)))
-
-        user_filename = "{}.txt".format(random_name)
-
-        args = self.parser.parse_args([self.str_len, '--file', user_filename])
-        self.assertTrue(user_filename, args.file)
-
     def test_switch_combinations(self):
         """Verifies all available switches accepted as an argument"""
 
@@ -91,18 +79,18 @@ class RandstrParserTests(unittest.TestCase):
                     self.assertTrue(getattr(args, dest))
 
 
-class RandstrOutputTests(unittest.TestCase):
-    """Test cases for randstr_terminal.randstr_output()"""
+class RandstrOutputFiles(unittest.TestCase):
+    """Test cases for randstr_terminal.randstr_output() file related operations"""
 
     def setUp(self):
         """Sets up default parser and test directories used during tests"""
-        self.parser = randstr_terminal.RandstrParser().parser
-        self.str_len = str(random.randint(10, 100))
+
+        self.test_dir = os.path.abspath(tempfile.mkdtemp())
+        os.chdir(self.test_dir)
 
         self.randstr_output = randstr_terminal.randstr_output
-
-        self.test_dir = tempfile.mkdtemp()
-        os.chdir(self.test_dir)
+        self.parser = randstr_terminal.RandstrParser().parser
+        self.str_len = str(random.randint(10, 100))
 
     def tearDown(self):
         """Removes any files/directories created during file write test
@@ -111,30 +99,10 @@ class RandstrOutputTests(unittest.TestCase):
         os.chdir(os.path.abspath(os.path.dirname(__file__)))
         shutil.rmtree(self.test_dir)
 
-    def test_raw_output(self):
-        """Tests use of --raw-output switch"""
-
-        args = self.parser.parse_args([self.str_len, '--raw-output'])
-        self.randstr_output(args)
-
-        output = sys.stdout.getvalue()
-        self.assertEqual(int(self.str_len), len(output))
-
-    def test_copy_results(self):
-        """Test that use of '--copy' switch copies string to clipboard"""
-
-        args = self.parser.parse_args([self.str_len, '--copy', '--print'])
-        self.randstr_output(args)
-
-        output = sys.stdout.getvalue()
-        clipboard_contents = pyperclip.paste()
-
-        self.assertIn(clipboard_contents, output)
-
     def test_file_write(self):
-        """Test that randomized correctly writes to file"""
+        """Test that randomized string correctly writes to file"""
 
-        args = self.parser.parse_args([self.str_len, '--file', '--print'])
+        args = self.parser.parse_args([self.str_len, '--file', '--raw-output'])
 
         self.randstr_output(args)
         output = sys.stdout.getvalue()
@@ -143,6 +111,89 @@ class RandstrOutputTests(unittest.TestCase):
         with open(filename, 'r') as f:
             random_string = f.read()
 
+        self.assertIn(random_string, output)
+
+    def test_default_filename_iteration(self):
+        """Verifies that generated filenames created when --file is provided
+        without a user-defined filename are unique in respect to
+        other filenames in CWD."""
+
+        for file_number in range(1, 11):
+            filename = 'randstr_{}.txt'.format(file_number)
+            with open(filename, 'w') as f:
+                f.flush()
+
+        parser = randstr_terminal.RandstrParser().parser
+        args = parser.parse_args([self.str_len, '--file'])
+        self.randstr_output(args)
+
+        expected_filename = 'randstr_11.txt'
+        self.assertTrue(os.path.exists(expected_filename))
+
+    def test_user_defined_filename(self):
+        """Tests that user defined filename overrides default filename for
+        --file switch"""
+
+        char_set = '{s.ascii_letters}{s.digits}'.format(s=string)
+        random_name = ''.join(
+            random.choice(char_set) for _ in range(0, random.randint(10, 50)))
+
+        user_filename = "{}.txt".format(random_name)
+
+        args = self.parser.parse_args([self.str_len, '-f', user_filename, '-ro'])
+        self.randstr_output(args)
+        output = sys.stdout.getvalue()
+
+        with open(user_filename, 'r') as f:
+            contents = f.read()
+
+        self.assertEqual(contents, output)
+
+
+class RandstrOutputStandard(unittest.TestCase):
+    """Tests non file related operations in randstr_terminal.randstr_output()"""
+
+    def setUp(self):
+        """Initialize common test attributes"""
+
+        # Saves clipboard as --copy switch will overwrite it's contents
+        self.clipboard_contents = pyperclip.paste()
+        self.randstr_output = randstr_terminal.randstr_output
+
+        self.parser = randstr_terminal.RandstrParser().parser
+        self.str_len = str(random.randint(10, 100))
+
+    def tearDown(self):
+        """Restores clipboard"""
+        pyperclip.copy(self.clipboard_contents)
+
+    def test_raw_output(self):
+        """Tests that --raw-output limits out only to generated string"""
+
+        args = self.parser.parse_args([self.str_len, '--raw-output'])
+        self.randstr_output(args)
+
+        output = sys.stdout.getvalue()
+        self.assertEqual(int(self.str_len), len(output))
+
+    def test_copy_operation(self):
+        """Test that use of '--copy' switch copies string to clipboard"""
+
+        args = self.parser.parse_args([self.str_len, '--copy', '--raw-output'])
+        self.randstr_output(args)
+
+        output = sys.stdout.getvalue()
+        clipboard_contents = pyperclip.paste()
+
+        self.assertEqual(clipboard_contents, output)
+
+    def test_print_operation(self):
+        """Tests that --print switch prints string to terminal"""
+        args = self.parser.parse_args([self.str_len, '--print', '--copy'])
+        self.randstr_output(args)
+
+        output = sys.stdout.getvalue()
+        random_string = pyperclip.paste()
         self.assertIn(random_string, output)
 
 
