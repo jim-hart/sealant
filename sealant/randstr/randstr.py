@@ -2,7 +2,6 @@
 
 Todo:
     * Track last generated string?
-    * Rename self.generate_random_string() once unittests complete
 
 """
 

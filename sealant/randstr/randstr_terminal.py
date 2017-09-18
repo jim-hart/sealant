@@ -100,6 +100,7 @@ def _write_file(random_string, filename):
     with open(filename, 'w') as f:
         f.write(random_string)
 
+
 def _generate_filename():
     """Generates handle used by the .txt file that will hold randomly generated
     string.
@@ -115,47 +116,48 @@ def _generate_filename():
     return "randstr_{}.txt".format(count)
 
 
-def randstr_output(parsed_args):
-    """Outputs randomized string based on arguments parsed by RandstrParser
+class RandstrOutput(object):
+    def __init__(self, parsed_args):
+        self.args = parsed_args
 
-    Args:
-        parsed_args (obj:`NameSpace`): Object containing all arguments parsed by
-            RandstrParser
-    """
+    def process_parsed_args(self):
 
-    string_generator = RandomString(
-        length=parsed_args.len, shuffle=parsed_args.shuffle,
-        user_char_set=parsed_args.characters)
+        string_generator = RandomString(length=self.args.len,
+                                        shuffle=self.args.shuffle, user_char_set=self.args.characters)
 
-    randomized_string = string_generator()
+        randomized_string = string_generator()
 
-    # Raw output
-    if parsed_args.raw_output:
+        if self.args.randstr_output:
+            self.print_raw_output(randomized_string)
+        else:
+            self.print_formatted_output(randomized_string)
+
+    def print_raw_output(self, randomized_string):
+
         sys.stdout.write(randomized_string)
 
-        if parsed_args.file:
-            _write_file(randomized_string, parsed_args.file)
+        if self.args.file:
+            _write_file(randomized_string, self.args.file)
 
-        if parsed_args.copy:
+        if self.args.copy:
             pyperclip.copy(randomized_string)
 
+    def print_formatted_output(self, randomized_string):
 
-    # Formatted output
-    else:
         print("\n{}Length: {}{}".format(
             '---------------------------------', len(randomized_string),
             '---------------------------------'))
 
-        if parsed_args.print:
+        if self.args.print:
             print()
             print(randomized_string)
 
-        if parsed_args.file:
-            _write_file(randomized_string, parsed_args.file)
+        if self.args.file:
+            _write_file(randomized_string, self.args.file)
             print("\nOutput written to: {}".format(
-                os.path.abspath(parsed_args.file)))
+                os.path.abspath(self.args.file)))
 
-        if parsed_args.copy:
+        if self.args.copy:
             pyperclip.copy(randomized_string)
             print("\nOutput String copied to clipboard")
 
@@ -165,4 +167,5 @@ def randstr_output(parsed_args):
 
 
 if __name__ == '__main__':
-    randstr_output(RandstrParser().args)
+    terminal_output = RandstrOutput(RandstrParser().args)
+    terminal_output.process_parsed_args()
