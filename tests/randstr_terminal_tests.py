@@ -88,7 +88,7 @@ class RandstrOutputFiles(unittest.TestCase):
         self.test_dir = os.path.abspath(tempfile.mkdtemp())
         os.chdir(self.test_dir)
 
-        self.randstr_output = randstr_terminal.randstr_output
+        self.randstr_output = randstr_terminal.RandstrOutput
         self.parser = randstr_terminal.RandstrParser().parser
         self.str_len = str(random.randint(10, 100))
 
@@ -104,7 +104,7 @@ class RandstrOutputFiles(unittest.TestCase):
 
         args = self.parser.parse_args([self.str_len, '--file', '--raw-output'])
 
-        self.randstr_output(args)
+        self.randstr_output(args).process_parsed_args()
         output = sys.stdout.getvalue()
 
         filename = os.path.join(self.test_dir, args.file)
@@ -125,7 +125,7 @@ class RandstrOutputFiles(unittest.TestCase):
 
         parser = randstr_terminal.RandstrParser().parser
         args = parser.parse_args([self.str_len, '--file'])
-        self.randstr_output(args)
+        self.randstr_output(args).process_parsed_args()
 
         expected_filename = 'randstr_11.txt'
         self.assertTrue(os.path.exists(expected_filename))
@@ -141,7 +141,7 @@ class RandstrOutputFiles(unittest.TestCase):
         user_filename = "{}.txt".format(random_name)
 
         args = self.parser.parse_args([self.str_len, '-f', user_filename, '-ro'])
-        self.randstr_output(args)
+        self.randstr_output(args).process_parsed_args()
         output = sys.stdout.getvalue()
 
         with open(user_filename, 'r') as f:
@@ -158,7 +158,7 @@ class RandstrOutputStandard(unittest.TestCase):
 
         # Saves clipboard as --copy switch will overwrite it's contents
         self.clipboard_contents = pyperclip.paste()
-        self.randstr_output = randstr_terminal.randstr_output
+        self.randstr_output = randstr_terminal.RandstrOutput
 
         self.parser = randstr_terminal.RandstrParser().parser
         self.str_len = str(random.randint(10, 100))
@@ -171,7 +171,7 @@ class RandstrOutputStandard(unittest.TestCase):
         """Tests that --raw-output limits out only to generated string"""
 
         args = self.parser.parse_args([self.str_len, '--raw-output'])
-        self.randstr_output(args)
+        self.randstr_output(args).process_parsed_args()
 
         output = sys.stdout.getvalue()
         self.assertEqual(int(self.str_len), len(output))
@@ -180,7 +180,7 @@ class RandstrOutputStandard(unittest.TestCase):
         """Test that use of '--copy' switch copies string to clipboard"""
 
         args = self.parser.parse_args([self.str_len, '--copy', '--raw-output'])
-        self.randstr_output(args)
+        self.randstr_output(args).process_parsed_args()
 
         output = sys.stdout.getvalue()
         clipboard_contents = pyperclip.paste()
@@ -189,7 +189,7 @@ class RandstrOutputStandard(unittest.TestCase):
     def test_print_operation(self):
         """Tests that --print switch prints string to terminal"""
         args = self.parser.parse_args([self.str_len, '--print', '--copy'])
-        self.randstr_output(args)
+        self.randstr_output(args).process_parsed_args()
 
         output = sys.stdout.getvalue()
         random_string = pyperclip.paste()

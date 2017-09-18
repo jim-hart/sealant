@@ -127,7 +127,7 @@ class RandstrOutput(object):
 
         randomized_string = string_generator()
 
-        if self.args.randstr_output:
+        if self.args.raw_output:
             self.print_raw_output(randomized_string)
         else:
             self.print_formatted_output(randomized_string)
