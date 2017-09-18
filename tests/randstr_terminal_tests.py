@@ -55,9 +55,10 @@ class RandstrParserTests(unittest.TestCase):
         """Verifies all available switches accepted as an argument"""
 
         switches = ['-p', '--print', '-cp', '--copy', '-f', '--file', '-ro',
-                    '--raw-output', ('-cs', 'abc'), ('--character-set', 'abc'),
-                    '-s', '--shuffle']
+                    '--raw-output', '-s', '--shuffle', '-rl', '--remove-limit',
+                    ('-cs', 'abc'), ('--character-set', 'abc')]
 
+        # Sets up switches with a length as argparse requires a length argument
         args = (('1',) + i if isinstance(i, tuple) else ('1', i) for i in switches)
 
         for arg in args:
@@ -66,11 +67,12 @@ class RandstrParserTests(unittest.TestCase):
 
     def test_boolean_switches(self):
         """Sub-tests for simple switches that store as True when included as an
-        argument"""
+        argument."""
         switches = {'print': ['-p', '--print'],
                     'copy': ['-cp', '--copy'],
                     'shuffle': ['-s', '--shuffle'],
-                    'raw_output': ['-ro', '--raw-output']}
+                    'raw_output': ['-ro', '--raw-output'],
+                    'remove_limit': ['-rl', '--remove-limit']}
 
         for dest, switches in switches.items():
             for switch in switches:
@@ -80,7 +82,8 @@ class RandstrParserTests(unittest.TestCase):
 
 
 class RandstrOutputFiles(unittest.TestCase):
-    """Test cases for randstr_terminal.randstr_output() file related operations"""
+    """Test cases for randstr_terminal.randstr_output() file related
+    operations."""
 
     def setUp(self):
         """Sets up default parser and test directories used during tests"""
@@ -179,7 +182,7 @@ class RandstrOutputStandard(unittest.TestCase):
     def test_copy_operation(self):
         """Test that use of '--copy' switch copies string to clipboard"""
 
-        args = self.parser.parse_args([self.str_len, '--copy', '--raw-output'])
+        args = self.parser.parse_args([self.str_len, '--raw-output', '--copy'])
         self.randstr_output(args).process_parsed_args()
 
         output = sys.stdout.getvalue()
@@ -188,12 +191,42 @@ class RandstrOutputStandard(unittest.TestCase):
 
     def test_print_operation(self):
         """Tests that --print switch prints string to terminal"""
-        args = self.parser.parse_args([self.str_len, '--print', '--copy'])
+        args = self.parser.parse_args(['10', '--print', '--copy'])
         self.randstr_output(args).process_parsed_args()
 
         output = sys.stdout.getvalue()
-        random_string = pyperclip.paste()
-        self.assertIn(random_string, output)
+        clipboard_contents = pyperclip.paste()
+        self.assertIn(clipboard_contents, output)
+
+    def test_set_length(self):
+        """Tests that generated string matches user defined length value.  Test
+        is for lengths under the default 1000 character limit"""
+
+        args = self.parser.parse_args([self.str_len, '--raw-output'])
+        self.randstr_output(args).process_parsed_args()
+
+        output = sys.stdout.getvalue()
+        self.assertEqual(int(self.str_len), len(output))
+
+    def test_default_length_limit(self):
+        """Tests that length defaults to 1000 when value exceeding 1000 provided
+        without the --remove-limit switch."""
+
+        args = self.parser.parse_args(['1500', '--raw-output'])
+        self.randstr_output(args).process_parsed_args()
+
+        output = sys.stdout.getvalue()
+        self.assertEqual(1000, len(output))
+
+    def test_length_limit_override(self):
+        """Tests that providing --remove-limit switch allows strings exceeding
+        1000 characters to be generated."""
+
+        args = self.parser.parse_args(['1500', '--remove-limit', '--raw-output'])
+        self.randstr_output(args).process_parsed_args()
+
+        output = sys.stdout.getvalue()
+        self.assertEqual(1500, len(output))
 
 
 if __name__ == '__main__':

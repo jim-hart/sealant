@@ -2,8 +2,6 @@
 methods.
 
 Todo:
-    * Add some kind of safety check to ensure OS brick-leveling strings aren't
-      created because of typo in length argument
     * Look into adding switch that allows character set to be built from ASCII
       attributes found in string module.  This would allow user to quickly
       override default character set with basic sub-sets like 'only lowercase
