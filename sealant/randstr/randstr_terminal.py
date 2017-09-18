@@ -8,15 +8,13 @@ Todo:
       attributes found in string module.  This would allow user to quickly
       override default character set with basic sub-sets like 'only lowercase
       letters', or 'all lower-case, upper-case, and digits'.
-    * Rewrite randstr_output as class to imrpove flow-control
-
 """
 
 import os
 import sys
 import argparse
-
 import pyperclip
+
 from randstr import RandomString
 
 
@@ -24,7 +22,8 @@ class RandstrParser(object):
     """Class for managing argparse objects and arguments
 
     Attributes:
-        parser (obj): main argparse object
+        parser (:obj:`ArgumentParser`): Parent argparse object used by all
+            parser arguments.
     """
 
     def __init__(self):
@@ -34,8 +33,11 @@ class RandstrParser(object):
 
     @staticmethod
     def create_parser():
-        """Returns parser object used for all argparse arguments"""
-
+        """
+        Returns:
+            :obj:`ArgumentParser`: Parent argparse object used by all parser
+                arguments.
+        """
         return argparse.ArgumentParser(
             description="Generate a cryptographically secure randomized string.",
             epilog="""\tDefault character set includes all ASCII upper and \
@@ -44,7 +46,7 @@ class RandstrParser(object):
 
     def add_parser_arguments(self):
         """Adds parser arguments that define characteristics of the randomly
-        generated string."""
+        generated string, and how that string should be output."""
 
         self.parser.add_argument(
             'len', type=int, metavar='LENGTH',
@@ -89,13 +91,17 @@ class RandstrParser(object):
 
     @property
     def args(self):
-        """Returns arguments parsed from terminal"""
-
+        """:obj:`NameSpace`: User arguments parsed by argparse parser object"""
         return self.parser.parse_args()
 
 
 def _write_file(random_string, filename):
-    """Utility function for writing randomly generated strings to a file."""
+    """Utility function for writing randomly generated strings to a file.
+
+    Args:
+        random_string (str)
+        filename (str)
+    """
 
     with open(filename, 'w') as f:
         f.write(random_string)
@@ -117,13 +123,23 @@ def _generate_filename():
 
 
 class RandstrOutput(object):
+    """Class for controlling how the randomly generated string is output
+
+    Attributes:
+        args (obj:`NameSpace`):  Arguments parsed by RandstrParser; used as
+            control switches for different output options.
+     """
+
     def __init__(self, parsed_args):
         self.args = parsed_args
 
     def process_parsed_args(self):
+        """Control method for determining if randomly generated string will be
+        presented in raw or formatted output."""
 
-        string_generator = RandomString(length=self.args.len,
-                                        shuffle=self.args.shuffle, user_char_set=self.args.characters)
+        string_generator = RandomString(
+            length=self.args.len, shuffle=self.args.shuffle,
+            user_char_set=self.args.characters)
 
         randomized_string = string_generator()
 
@@ -133,6 +149,12 @@ class RandstrOutput(object):
             self.print_formatted_output(randomized_string)
 
     def print_raw_output(self, randomized_string):
+        """Suppresses any kind of output formatting and/or verbose output so
+        only randomly generated string is printed to terminal.
+
+        Args:
+            randomized_string (str)
+        """
 
         sys.stdout.write(randomized_string)
 
@@ -143,6 +165,12 @@ class RandstrOutput(object):
             pyperclip.copy(randomized_string)
 
     def print_formatted_output(self, randomized_string):
+        """Displays randomly generated string with additional information like
+        visual delimiters and status messages.
+
+        Args:
+            randomized_string (str)
+        """
 
         print("\n{}Length: {}{}".format(
             '---------------------------------', len(randomized_string),
