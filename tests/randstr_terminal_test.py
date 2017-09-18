@@ -9,6 +9,7 @@ import tempfile
 import string
 import random
 import pyperclip
+import io
 
 sys.path.insert(0, os.path.abspath('../sealant/randstr'))  # shhh
 import randstr_terminal
@@ -27,11 +28,9 @@ class RandstrParserTests(unittest.TestCase):
 
     def test_undefined_length(self):
         """Verify passing empty arguments causes system exit"""
+
         with self.assertRaises(SystemExit) as cm:
             self.parser.parse_args()
-
-        sys_exit = cm.exception
-        self.assertEqual(sys_exit.code, 2)
 
     def test_length_argument(self):
         """tests length value and type correctly set"""
@@ -95,12 +94,16 @@ class RandstrOutputFiles(unittest.TestCase):
         self.parser = randstr_terminal.RandstrParser().parser
         self.str_len = str(random.randint(10, 100))
 
+        sys.stdout = io.StringIO()
+
     def tearDown(self):
         """Removes any files/directories created during file write test
-        procedures."""
+        procedures and resets sys.stdout back to its default value"""
 
         os.chdir(os.path.abspath(os.path.dirname(__file__)))
         shutil.rmtree(self.test_dir)
+
+        sys.stdout = sys.__stdout__
 
     def test_file_write(self):
         """Test that randomized string correctly writes to file"""
@@ -166,9 +169,13 @@ class RandstrOutputStandard(unittest.TestCase):
         self.parser = randstr_terminal.RandstrParser().parser
         self.str_len = str(random.randint(10, 100))
 
+        sys.stdout = io.StringIO()
+
     def tearDown(self):
-        """Restores clipboard"""
+        """Restores clipboard and resets sys.stdout back to its default value"""
+
         pyperclip.copy(self.clipboard_contents)
+        sys.stdout = sys.__stdout__
 
     def test_raw_output(self):
         """Tests that --raw-output limits out only to generated string"""
