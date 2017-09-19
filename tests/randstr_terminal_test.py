@@ -29,7 +29,7 @@ class RandstrParserTests(unittest.TestCase):
     def test_undefined_length(self):
         """Verify passing empty arguments causes system exit"""
 
-        with self.assertRaises(SystemExit) as cm:
+        with self.assertRaises(SystemExit) as _:
             self.parser.parse_args()
 
     def test_length_argument(self):
@@ -104,6 +104,24 @@ class RandstrOutputFiles(unittest.TestCase):
         shutil.rmtree(self.test_dir)
 
         sys.stdout = sys.__stdout__
+
+    def test_no_filename_extension(self):
+        """Tests that providing a filename without an extension defaults the
+        extension to .txt"""
+
+        expected_filename = os.path.join(self.test_dir, 'test_file.txt')
+        returned_filename = randstr_terminal._write_file('', 'test_file')
+
+        self.assertEqual(expected_filename, returned_filename)
+
+    def test_filename_with_extension(self):
+        """Tests that providing a filename extension doesn't add an additional
+        extension"""
+
+        expected_filename = os.path.join(self.test_dir, 'test_file.txt')
+        returned_filename = randstr_terminal._write_file('', 'test_file.txt')
+
+        self.assertEqual(expected_filename, returned_filename)
 
     def test_file_write(self):
         """Test that randomized string correctly writes to file"""

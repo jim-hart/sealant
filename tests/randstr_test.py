@@ -44,7 +44,7 @@ class RandomStringGenerationTests(unittest.TestCase):
         string"""
 
         self.randstr_generator.char_set = user_set = random.sample(
-                                                    self.reference_char_set, 10)
+            self.reference_char_set, 10)
         for char_len in range(10, 101, 10):
             return_str = self.randstr_generator()
 

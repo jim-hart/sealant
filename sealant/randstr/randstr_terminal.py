@@ -148,7 +148,8 @@ class RandstrOutput(object):
         sys.stdout.write(self.generated_string)
 
         if self.args.file:
-            _write_file(self.generated_string, self.args.file)
+            _write_file(
+                random_str=self.generated_string, filename=self.args.file)
 
         if self.args.copy:
             pyperclip.copy(self.generated_string)
@@ -166,9 +167,9 @@ class RandstrOutput(object):
             print(self.generated_string)
 
         if self.args.file:
-            _write_file(self.generated_string, self.args.file)
-            print("\nOutput written to: {}".format(
-                os.path.abspath(self.args.file)))
+            file_reference = _write_file(
+                random_str=self.generated_string, filename=self.args.file)
+            print("\nOutput written to: {}".format(file_reference))
 
         if self.args.copy:
             pyperclip.copy(self.generated_string)
@@ -179,16 +180,26 @@ class RandstrOutput(object):
             '--------------------------------------'))
 
 
-def _write_file(random_string, filename):
+def _write_file(random_str, filename):
     """Utility function for writing randomly generated strings to a file.
 
     Args:
-        random_string (str)
+        random_str (str)
         filename (str)
+
+    Returns:
+        str: abolsute path to filename to indicate where user can find output
+            file itself
     """
 
+    # Basic filename extension check
+    if '.' not in filename:
+        filename += '.txt'
+
     with open(filename, 'w') as f:
-        f.write(random_string)
+        f.write(random_str)
+
+    return os.path.abspath(filename)
 
 
 def _generate_filename():
