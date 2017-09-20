@@ -33,14 +33,14 @@ class RandstrParserTests(unittest.TestCase):
             self.parser.parse_args()
 
     def test_length_argument(self):
-        """tests length value and type correctly set"""
+        """Tests length value and type correctly set"""
 
         args = self.parser.parse_args([self.str_len])
         self.assertEqual(int(self.str_len), args.len)
 
     def test_character_set_argument(self):
-        """Tests that user-defined character set is correctly saved (i.e.
-        identical characters and character index positions)"""
+        """Tests that when an alternate character set is provided, that set
+        contains all provided characters in their original index positions."""
 
         user_char_set = ''.join(random.sample(
             self.reference_char_set, random.randint(10, 90)))
@@ -55,9 +55,9 @@ class RandstrParserTests(unittest.TestCase):
 
         switches = ['-p', '--print', '-cp', '--copy', '-f', '--file', '-ro',
                     '--raw-output', '-s', '--shuffle', '-rl', '--remove-limit',
-                    ('-cs', 'abc'), ('--character-set', 'abc')]
+                    ('-cs', ''), ('--character-set', '')]
 
-        # Sets up switches with a length as argparse requires a length argument
+        # Sets up switches with required length argument
         args = (('1',) + i if isinstance(i, tuple) else ('1', i) for i in switches)
 
         for arg in args:
@@ -196,7 +196,7 @@ class RandstrOutputStandard(unittest.TestCase):
         sys.stdout = sys.__stdout__
 
     def test_raw_output(self):
-        """Tests that --raw-output limits out only to generated string"""
+        """Tests that --raw-output limits output only to generated string"""
 
         args = self.parser.parse_args([self.str_len, '--raw-output'])
         self.randstr_output(args).process_parsed_args()

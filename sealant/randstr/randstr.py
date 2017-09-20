@@ -14,7 +14,7 @@ import random
 
 """"Cryptographically secure random numbers are generated using SystemRandom
 class.  The secrets module has a secrets.SystemRandom class, but this is just an
-alias for random.SystemRandom. It's inclusion is to to favor newer Python
+alias for random.SystemRandom. It's inclusion is to favor newer Python 3
 modules if available."""
 try:
     RAND_METHOD = importlib.import_module('secrets')
@@ -61,7 +61,7 @@ class RandomString(object):
             self.shuffle_characters()
 
         return "".join(
-            [RAND_METHOD.choice(self.char_set) for _ in range(0, self.length)])
+            RAND_METHOD.choice(self.char_set) for _ in range(0, self.length))
 
     def shuffle_characters(self):
         """Implementation of Python's random.shuffle(), except random numbers

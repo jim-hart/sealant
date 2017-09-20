@@ -49,8 +49,8 @@ class RandstrParser(object):
         self.parser.add_argument(
             'len', type=int, metavar='LENGTH',
             help="""Length of the randomized string.  By default, length is \
-            limited by default to 1000 characters unless the --remove-limit \
-            is switch provided. Values exceeding the default limit will be \
+            limited to 1000 characters unless the --remove-limit \
+            switch is provided. Values exceeding the default limit will be \
             reduced to 1000 if the --remove-limit switch is not included.""")
 
         # Terminal, clipboard, and file output options
@@ -71,8 +71,8 @@ class RandstrParser(object):
 
         output_options.add_argument(
             '-ro', '--raw-output', action='store_true', dest='raw_output',
-            help="""Limits output to only randomized string.  Use this option \
-            if you want to pipe output elsewhere, or if you don't want \
+            help="""Limits output to only the randomized string.  Use this \
+            option if you want to pipe output elsewhere, or if you don't want \
             additional details included in the printout.  This option \
             replaces --print if used.""")
 
@@ -104,8 +104,7 @@ class RandstrParser(object):
 
 
 class RandstrOutput(object):
-    """Class for controlling how the randomly generated string is output
-
+    """Class for controlling output of randomly generated string
     Attributes:
         args (obj:`NameSpace`): Arguments parsed by RandstrParser; used as
             control switches for different output options.
@@ -203,8 +202,7 @@ def _write_file(random_str, filename):
 
 
 def _generate_filename():
-    """Generates handle used by the .txt file that will hold randomly generated
-    string.
+    """Generates handle used by the .txt file that will hold generated string.
 
     Returns:
         str: Unique filename in respect to current working directory
