@@ -48,14 +48,21 @@ class RandomString(object):
 
     def __call__(self):
         """Allows calling RandomString() like a function for continual random
-        string generation"""
+        string generation
+
+        Returns:
+            str: Description
+        """
 
         if self.length:
-            return str(self.generate_random_string())
+            return self.generate_random_string()
 
     def generate_random_string(self):
-        """Returns randomized string generated using instance attributes as
-        generation parameters"""
+        """
+        Returns:
+            str: String of randomly generated characters; string length and
+                population sample defined by instance attributes
+        """
 
         if self.shuffle:
             self.shuffle_characters()
@@ -64,12 +71,8 @@ class RandomString(object):
             RAND_METHOD.choice(self.char_set) for _ in range(0, self.length))
 
     def shuffle_characters(self):
-        """Implementation of Python's random.shuffle(), except random numbers
-        generated for shuffle process use SystemRandom() instead.
-
-        Although this implementation matches random.shuffle(), pseudo-RNGs
-        produce values faster than cryptographically-secure-RNGs, making this
-        implementation 3X slower."""
+        """Implementation of Python's random.shuffle(); uses SystemRandom() for
+        random number generation instead standard pseudo-RNG."""
 
         char_list = list(self.char_set)
         for i in range(len(char_list) - 1, 1, -1):
@@ -80,10 +83,8 @@ class RandomString(object):
 
     @property
     def default_char_set(self):
-        """Returns string containing ASCII lower case, upper case, and
-        punctuation characters, and a single character space."""
-
-        # Note character space at the end
+        """str: concatenation of all ASCII lowercase, uppercase, and punctuation
+        characters.  Also contains single character space."""
         return '{s.ascii_letters}{s.digits}{s.punctuation} '.format(s=string)
 
 

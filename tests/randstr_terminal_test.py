@@ -2,14 +2,15 @@
 
 import os
 import sys
+import io
 import shutil
+
 import unittest
 import tempfile
-
 import string
 import random
+
 import pyperclip
-import io
 
 sys.path.insert(0, os.path.abspath('../sealant/randstr'))  # shhh
 import randstr_terminal

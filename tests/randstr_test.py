@@ -4,11 +4,10 @@ Todo:
     1. Add test case to check that --raw-output switch overrides --print switch
 
 """
-
+import os
+import sys
 import unittest
 import random
-import sys
-import os
 
 sys.path.insert(0, os.path.abspath('../sealant/randstr'))  # Ughh
 import randstr

@@ -8,6 +8,8 @@ Todo:
       letters', or 'all lower-case, upper-case, and digits'.
 """
 
+from __future__ import print_function
+
 import os
 import sys
 import argparse
@@ -100,11 +102,12 @@ class RandstrParser(object):
     @property
     def args(self):
         """:obj:`NameSpace`: User arguments parsed by argparse parser object"""
-        return self.parser.parse_args()
+        return self.parser.parse_known_args()
 
 
 class RandstrOutput(object):
-    """Class for controlling output of randomly generated string
+    """Class for controlling output of randomly generated string.
+
     Attributes:
         args (obj:`NameSpace`): Arguments parsed by RandstrParser; used as
             control switches for different output options.
