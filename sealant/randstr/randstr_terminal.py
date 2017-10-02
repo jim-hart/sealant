@@ -102,7 +102,7 @@ class RandstrParser(object):
     @property
     def args(self):
         """:obj:`NameSpace`: User arguments parsed by argparse parser object"""
-        return self.parser.parse_known_args()
+        return self.parser.parse_args()
 
 
 class RandstrOutput(object):
@@ -123,13 +123,11 @@ class RandstrOutput(object):
     def _generated_string(self):
         """str: randomly generated string via RandomString() class."""
 
-        if self.args.remove_limit:
-            str_length = self.args.len
-        else:
-            str_length = self.args.len if self.args.len <= 1000 else 1000
-
+        if not self.args.remove_limit:
+            self.args.len = self.args.len if self.args.len <= 1000 else 1000
+Rever
         string_generator = RandomString(
-            length=str_length, shuffle=self.args.shuffle,
+            length=self.args.len, shuffle=self.args.shuffle,
             user_char_set=self.args.characters)
 
         return string_generator()
