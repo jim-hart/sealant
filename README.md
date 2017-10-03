@@ -37,7 +37,7 @@ randstr provides an interface for generating random data in the form of strings 
 The default character set can be replaced by the user if desired.  String output is available through any combination of the following:
 
   1. Auto-copy to clipboard
-  2. Terminal printout
+  2. OutputFormatting printout
   3. `.txt` file
 
 
