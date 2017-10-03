@@ -28,16 +28,15 @@ class Digest(object):
 
 
     Attributes:
-        hash_family (str): Name of base hash family name (md5, sha1, sha2, or
-            sha3)
         reference_digest (str): Either a filename containing a generated hash
             digest, or the actual hash digest itself
+        sha3 (bool): Designates whether SHA3 should be used over SHA2
 
     """
 
-    def __init__(self, hash_family, reference_digest):
-        self.hash_family = hash_family
+    def __init__(self, reference_digest, sha3=False):
         self.reference_digest = self.process_reference(reference_digest)
+        self.sha3 = sha3
 
     @staticmethod
     def process_reference(source):
@@ -61,14 +60,16 @@ class Digest(object):
     def hash_method(self):
         """str: Exact name of built-in hashlib method as a string."""
 
-        available_hash_methods = {
-            'md5': {32, 'md5'},
-            'sha1': {40, 'sha1'},
-            'sha2': {56: 'sha224', 64: 'sha256', 96: 'sha384', 128: 'sha512'},
-            'sha3': {56: 'sha3_224', 64: 'sha3_256', 96: 'sha3_384', 128: 'sha3_512'}
+        standard_hash_methods = {
+            32: 'md5', 40: 'sha1', 56: 'sha224', 64: 'sha256', 96: 'sha384',
+            128: 'sha512'
+            }
+
+        sha3_methods = {
+            56: 'sha3_224', 64: 'sha3_256', 96: 'sha3_384', 128: 'sha3_512'
         }
 
-        family = available_hash_methods[self.hash_family]
+        family = standard_hash_methods if not self.sha3 else sha3_methods
         digest_length = len(self.reference_digest)
 
         try:

@@ -49,41 +49,31 @@ class HashChkParser(object):
             help="""Generate a hash digest from a binary and compare it \
             against a provided digest using SHA-2 (default) or SHA-3""")
 
-        # Required parameters group
+        # Required parameters
         req_group = verify_parser.add_argument_group('Required Parameters')
         req_group.add_argument(
-            '-d', '--digest', required=True, metavar="STRING|FILENAME",
+            'digest', metavar="STRING|FILENAME",
             help="""Either a string or filename to a file containing a valid \
             hash digest""")
 
         req_group.add_argument(
-            '-bin', '--binary', dest='binary', required=True,
-            metavar="FILENAME|PATH/FILENAME",
+            'binary', metavar="FILENAME|PATH/FILENAME",
             help="""Generates a hash digest of of the file located at \
-            PATH/FILENAME, or just FILENAME if file is located in the cwd.""")
+            PATH/FILENAME, or just FILENAME if file is located in the CWD.""")
 
-        # Algorithm choices group
-        algorithms_group = verify_parser.add_argument_group('Algorithm Parameters')
+        # Hash method specifications
+        algorithms_group = verify_parser.add_argument_group('Hash Methods')
         algorithms_group.add_argument(
-            '-sha3', dest='hash_family', action='store_const', const='sha3',
-            default='sha2',
-            help="""Use SHA-3 (fixed length) instead of SHA-2. Regardless of \
-            the SHA version used, bit length is determined automatically based \
-            on the length of the provided digest.""")
+            '-sha3', dest='sha3', action="store_true",
+            help="""SHA3 will be used for hash digest generation instead of \
+            SHA2 (used for automatic hash method detection).""")
 
         algorithms_group.add_argument(
-            '--insecure',
-            metavar='md5|sha1', dest='hash_family', choices=['md5', 'sha1'],
-            help="""WARNING: MD5 and SHA1 are insecure hash algorithms; they \
-            should only be used to check for unintentional data corruption. \
-            You can force use of one of these two methods by using this switch \
-            along with the hash algorithm name.""")
-
-        # Output choices group
-        output_group = verify_parser.add_argument_group('Output Options')
-        output_group.add_argument(
-            '-diff', dest='diff', action='store_true',
-            help="Print differences (if any) between digests")
+            '-hf', '--hash-function', dest='hash_function', default=None,
+            choices=['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512',
+                     'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512'],
+            help="""Override automatic detection of the hash method and \
+            explicitly define the hash method used for digest verification.""")
 
     @property
     def args(self):
@@ -100,17 +90,17 @@ class Terminal(object):
             generated).
     """
 
-    def __init__(self, digest_length=None):
-        self.width = (67 or digest_length) + 7
+    def __init__(self, reference_length=None):
+        self.width = (67 or reference_length) + 7
 
-    def build_line_break(self, header, line_char='-', color=None):
+    def build_line_break(self, header, delimiter='-', color=None):
         """Dynamically generates visual line breaks by padding a centered header
         with some type of punctuation('-' by default).  Left/right padding
         length is determined by self.width attribute.
 
         Args:
             header (str): Text to be centered
-            line_char (str, optional): Character used to pad header with
+            delimiter (str, optional): Character used to pad header with
             color (None, optional): color highlighting for header
 
         Returns:
@@ -120,8 +110,8 @@ class Terminal(object):
         size = self.width - len(header)
         highlight = color if color else ''
 
-        left_line = ''.join(line_char for _ in range(size // 2))
-        right_line = ''.join(line_char for _ in range(size - (size // 2)))
+        left_line = ''.join(delimiter for _ in range(size // 2))
+        right_line = ''.join(delimiter for _ in range(size - (size // 2)))
 
         tag = "{}{}{}".format(highlight + BRIGHT, header, RESET_COLOR)
         return " {}{}{}".format(left_line, tag, right_line)
@@ -139,14 +129,14 @@ class Terminal(object):
 
         else:
             print("\n{}\n".format(self.build_line_break(
-                header='FAIL: Digests DO NOT Match', line_char='*', color=RED)))
+                header='FAIL: Digests DO NOT Match', delimiter='*', color=RED)))
 
     def print_diffs(self, d1, d2, identifiers=None):
         """Prints out `diff` style differences between two strings
 
         Args:
-            d1 (str): 1 of 2 digests used for diff comparison
-            d2 (str): 2 of 2 digests used for diff comparison
+            d1 (str): digest1 used for diff comparison
+            d2 (str): digest2 used for diff comparison
             identifiers (list[str], optional): Prefix titles to distinguish
                 digests apart
         """
@@ -167,35 +157,35 @@ class Terminal(object):
         print("{}\n".format(self.build_line_break(header='End')))
 
 
-def _compare_verify_digests(verify_args):
+def _compare_verify_digests(args):
     """Takes in parsed arguments from HashChkParser verify subparser and prints
     out comparison results.
 
     Args:
-        verify_args (:obj:`Namespace`): All arguments parsed from HashChkParser
+        args (:obj:`Namespace`): Arguments parsed from verify subparser
     """
 
-    digest_attributes = hashchk.Digest(
-        hash_family=verify_args.hash_family, reference_digest=verify_args.digest)
+    digest = hashchk.Digest(reference_digest=args.digest, sha3=args.sha3)
 
-    output = Terminal(digest_length=len(digest_attributes.reference_digest))
+    output = Terminal(reference_length=len(digest.reference_digest))
     print("\n{}\n".format(output.build_line_break(header='Comparing Now')))
 
     # provided printout
-    provided_digest = digest_attributes.reference_digest
+    provided_digest = digest.reference_digest
     print(" Provided :{}".format(provided_digest))
 
     # stdout used to provide status message while digest is being generated
     sys.stdout.write(' Generated: {}'.format('Calculating'.center(60)))
     generated_digest = hashchk.generate_digest(
-        filename=verify_args.binary, hash_method=digest_attributes.hash_method)
+        filename=args.binary,
+        hash_method=args.hash_function or digest.hash_method)
     sys.stdout.write("\r Generated:{}\n".format(generated_digest))
 
     # Compare and printout results
     result = hashchk.compare_digests(provided_digest, generated_digest)
     output.print_comparison_results(result)
 
-    if verify_args.diff and not result:
+    if not result:
         output.print_diffs(
             provided_digest, generated_digest, ['Provided', 'Generated'])
 
