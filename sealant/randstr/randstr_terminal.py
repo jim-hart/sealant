@@ -125,7 +125,7 @@ class RandstrOutput(object):
 
         if not self.args.remove_limit:
             self.args.len = self.args.len if self.args.len <= 1000 else 1000
-Rever
+
         string_generator = RandomString(
             length=self.args.len, shuffle=self.args.shuffle,
             user_char_set=self.args.characters)

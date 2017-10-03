@@ -87,9 +87,7 @@ class HashChkParser(object):
 
     @property
     def args(self):
-        """Returns Namespace object containing arguments parsed by main argparse
-        object"""
-
+        """:obj:`NameSpace`: arguments parsed by main argparse object"""
         return self.parser.parse_args()
 
 
@@ -177,19 +175,20 @@ def _compare_verify_digests(verify_args):
         verify_args (:obj:`Namespace`): All arguments parsed from HashChkParser
     """
 
-    digest = hashchk.Digest(
+    digest_attributes = hashchk.Digest(
         hash_family=verify_args.hash_family, reference_digest=verify_args.digest)
 
-    output = Terminal(digest_length=len(digest.reference_digest))
+    output = Terminal(digest_length=len(digest_attributes.reference_digest))
     print("\n{}\n".format(output.build_line_break(header='Comparing Now')))
 
     # provided printout
-    provided_digest = digest.reference_digest
+    provided_digest = digest_attributes.reference_digest
     print(" Provided :{}".format(provided_digest))
 
     # stdout used to provide status message while digest is being generated
     sys.stdout.write(' Generated: {}'.format('Calculating'.center(60)))
-    generated_digest = digest.generate_digest(verify_args.binary)
+    generated_digest = hashchk.generate_digest(
+        filename=verify_args.binary, hash_method=digest_attributes.hash_method)
     sys.stdout.write("\r Generated:{}\n".format(generated_digest))
 
     # Compare and printout results
