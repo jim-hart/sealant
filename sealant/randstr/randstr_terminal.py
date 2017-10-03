@@ -55,7 +55,7 @@ class RandstrParser(object):
             switch is provided. Values exceeding the default limit will be \
             reduced to 1000 if the --remove-limit switch is not included.""")
 
-        # Terminal, clipboard, and file output options
+        # OutputFormatting, clipboard, and file output options
         output_options = self.parser.add_argument_group('Output Options')
         output_options.add_argument(
             '-p', '--print', action='store_true',

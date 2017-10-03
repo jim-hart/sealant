@@ -3,7 +3,8 @@
 Todo:
     * Implement SHAKE and BLAKE
     * Resist urge to call it "SHAKE'N BLAKE"
-    * Allow user to explicitly define hash method
+    * Write better method for dealing with digest references that weren't
+          correctly provided.
 """
 
 # ----------------------------Compatibility Imports----------------------------

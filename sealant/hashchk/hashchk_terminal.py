@@ -12,7 +12,6 @@ from __future__ import print_function
 from six.moves import range
 # -----------------------------------------------------------------------------
 
-import os
 import sys
 import argparse
 import difflib
@@ -25,7 +24,7 @@ RED, GREEN, CYAN = colorama.Fore.RED, colorama.Fore.GREEN, colorama.Fore.CYAN
 BRIGHT, RESET_COLOR = colorama.Style.BRIGHT, colorama.Style.RESET_ALL
 
 
-class HashChkParser(object):
+class HashchkParser(object):
     """Class for creating and assembling argparse object used in hashchk.py
 
     Attributes:
@@ -37,7 +36,7 @@ class HashChkParser(object):
         self.parser = argparse.ArgumentParser(
             description="Generate and compare hash digests")
         self.subparser = self.parser.add_subparsers(
-            title="Commands", description="Available Actions")
+            title="Commands", description="Available Actions", dest='command')
 
         self.add_verify_command()
 
@@ -52,12 +51,12 @@ class HashChkParser(object):
         # Required parameters
         req_group = verify_parser.add_argument_group('Required Parameters')
         req_group.add_argument(
-            'digest', metavar="STRING|FILENAME",
+            '-digest', metavar="STRING|FILENAME",
             help="""Either a string or filename to a file containing a valid \
             hash digest""")
 
         req_group.add_argument(
-            'binary', metavar="FILENAME|PATH/FILENAME",
+            '-binary', metavar="FILENAME|PATH/FILENAME",
             help="""Generates a hash digest of of the file located at \
             PATH/FILENAME, or just FILENAME if file is located in the CWD.""")
 
@@ -81,22 +80,70 @@ class HashChkParser(object):
         return self.parser.parse_args()
 
 
-class Terminal(object):
-    """Class for reusable and dynamic output messages
+class HashchkOutput(object):
+    """Class for managing methods related to different subcommands made
+        available by HashchkParser.
 
     Attributes:
-        width (int, optional): Length of digest plus predefined padding length
-            of 7 to account for digest source prefix (i.e. provided vs
-            generated).
+        args (obj:`NameSpace`): Subcommand arguments parsed by HashchkParser.
     """
 
-    def __init__(self, reference_length=None):
-        self.width = (67 or reference_length) + 7
+    def __init__(self, parsed_args):
+        self.args = parsed_args
+
+    def dispatch_subparser(self):
+        """Calls method associated with HashchkParser subcommand by dispatching
+        `commands` dictionary"""
+
+        commands = {'verify': self.verify_digests}
+        commands[self.args.command]()
+
+    def verify_digests(self):
+        """Processes args parsed args by verify sub-command.  Processing results
+        in the comparison of a provided hash digest against one generated from a
+        binary."""
+
+        digest = hashchk.Digest(
+            reference_digest=self.args.digest, sha3=self.args.sha3)
+
+        formatting = OutputFormatting(width=len(digest.reference_digest))
+        print("\n{}\n".format(
+            formatting.build_line_break(header='Comparing Now')))
+
+        # provided printout
+        provided_digest = digest.reference_digest
+        print(" Provided :{}".format(provided_digest))
+
+        # stdout used to provide status message while digest is being generated
+        sys.stdout.write(' Generated: {}'.format('Calculating'.center(60)))
+        generated_digest = hashchk.generate_digest(
+            filename=self.args.binary,
+            hash_method=self.args.hash_function or digest.hash_method)
+        sys.stdout.write("\r Generated:{}\n".format(generated_digest))
+
+        # Compare and printout results
+        result = hashchk.compare_digests(provided_digest, generated_digest)
+        formatting.print_comparison_results(result)
+
+        if not result:
+            formatting.print_diffs(
+                provided_digest, generated_digest, ['Provided', 'Generated'])
+
+
+class OutputFormatting(object):
+    """Organizational class for reusable and dynamic output messages
+
+    Attributes:
+        width (int, optional): Length of display text plus predefined padding
+            length of 7 to best account for different prefixes ('generated' and
+            'provided') associated with said display text.
+    """
+
+    def __init__(self, width=None):
+        self.width = (67 or width) + 7
 
     def build_line_break(self, header, delimiter='-', color=None):
-        """Dynamically generates visual line breaks by padding a centered header
-        with some type of punctuation('-' by default).  Left/right padding
-        length is determined by self.width attribute.
+        """Generates dynamically padded visual line breaks.
 
         Args:
             header (str): Text to be centered
@@ -157,41 +204,6 @@ class Terminal(object):
         print("{}\n".format(self.build_line_break(header='End')))
 
 
-def _compare_verify_digests(args):
-    """Takes in parsed arguments from HashChkParser verify subparser and prints
-    out comparison results.
-
-    Args:
-        args (:obj:`Namespace`): Arguments parsed from verify subparser
-    """
-
-    digest = hashchk.Digest(reference_digest=args.digest, sha3=args.sha3)
-
-    output = Terminal(reference_length=len(digest.reference_digest))
-    print("\n{}\n".format(output.build_line_break(header='Comparing Now')))
-
-    # provided printout
-    provided_digest = digest.reference_digest
-    print(" Provided :{}".format(provided_digest))
-
-    # stdout used to provide status message while digest is being generated
-    sys.stdout.write(' Generated: {}'.format('Calculating'.center(60)))
-    generated_digest = hashchk.generate_digest(
-        filename=args.binary,
-        hash_method=args.hash_function or digest.hash_method)
-    sys.stdout.write("\r Generated:{}\n".format(generated_digest))
-
-    # Compare and printout results
-    result = hashchk.compare_digests(provided_digest, generated_digest)
-    output.print_comparison_results(result)
-
-    if not result:
-        output.print_diffs(
-            provided_digest, generated_digest, ['Provided', 'Generated'])
-
-
 if __name__ == '__main__':
-    os.system('cls')
     colorama.init(convert=True)
-
-    _compare_verify_digests(HashChkParser().args)
+    terminal = HashchkOutput(parsed_args=HashchkParser().args)
