@@ -5,6 +5,11 @@ Todo:
     * More tests on what arguments common argument groups return
     * Generate command
     * Compare command
+        * Add command for checking that digest contents match known hash method
+          signature?
+    * Better flow control for building line breaks
+        * Take end line break creation out of print_comparison()?
+
 """
 
 # ----------------------------Compatibility Imports----------------------------
@@ -39,6 +44,7 @@ class HashchkParser(object):
             title="Commands", description="Available Actions", dest='command')
 
         self.add_verify_command()
+        self.add_compare_command()
 
     def add_verify_command(self):
         """Adds verify command and arguments to parent subparser object."""
@@ -49,13 +55,13 @@ class HashchkParser(object):
             against a provided digest using SHA-2 (default) or SHA-3""")
 
         # Required parameters
-        req_group = verify_parser.add_argument_group('Required Parameters')
-        req_group.add_argument(
+        required_group = verify_parser.add_argument_group('Required Parameters')
+        required_group.add_argument(
             '-digest', metavar="STRING|FILENAME",
             help="""Either a string or filename to a file containing a valid \
             hash digest""")
 
-        req_group.add_argument(
+        required_group.add_argument(
             '-binary', metavar="FILENAME|PATH/FILENAME",
             help="""Generates a hash digest of of the file located at \
             PATH/FILENAME, or just FILENAME if file is located in the CWD.""")
@@ -74,6 +80,22 @@ class HashchkParser(object):
             help="""Override automatic detection of the hash method and \
             explicitly define the hash method used for digest verification.""")
 
+    def add_compare_command(self):
+        """Adds compare command and related arguments to parent subparser
+        object."""
+
+        compare_parser = self.subparser.add_parser(
+            'compare',
+            help="""Compare and validate two hash digests against each other""")
+
+        required_group = compare_parser.add_argument_group(
+            'Required Parameters')
+        required_group.add_argument(
+            'digests', nargs=2, metavar="STRING|FILENAME STRING|FILENAME",
+            help="""Digests can either be provided directly with this command, \
+            or, a valid path to the file containing a generated digest can be \
+            included.""")
+
     @property
     def args(self):
         """:obj:`NameSpace`: arguments parsed by main argparse object"""
@@ -91,15 +113,18 @@ class HashchkOutput(object):
     def __init__(self, parsed_args):
         self.args = parsed_args
 
+        self.dispatch_subparser()
+
     def dispatch_subparser(self):
         """Calls method associated with HashchkParser subcommand by dispatching
         `commands` dictionary"""
 
-        commands = {'verify': self.verify_digests}
+        commands = {'verify': self.verify_digests,
+                    'compare': self.compare_digests}
         commands[self.args.command]()
 
     def verify_digests(self):
-        """Processes args parsed args by verify sub-command.  Processing results
+        """Processes args parsed by verify sub-command.  Processing results
         in the comparison of a provided hash digest against one generated from a
         binary."""
 
@@ -128,6 +153,30 @@ class HashchkOutput(object):
         if not result:
             formatting.print_diffs(
                 provided_digest, generated_digest, ['Provided', 'Generated'])
+
+    def compare_digests(self):
+        """Processes args parsed by compare sub-command. Processing results in
+        two previously generated hash digests being compared against each
+        other."""
+
+        processed_digests = []
+        for digest in self.args.digests:
+            processed_digests.append(hashchk.Digest(digest).reference_digest)
+
+        format_length = max(len(digest) for digest in processed_digests)
+        formatting = OutputFormatting(width=format_length)
+
+        result = hashchk.compare_digests(
+            processed_digests[0], processed_digests[1])
+        print("\n{}\n".format(
+            formatting.build_line_break(header='Results')))
+
+        print(" Digest1: {}".format(processed_digests[0]))
+        print(" Digest2: {}".format(processed_digests[1]))
+        formatting.print_comparison_results(result)
+
+        if not result:
+            formatting.print_diffs(d1=processed_digests[0], d2=processed_digests[1])
 
 
 class OutputFormatting(object):

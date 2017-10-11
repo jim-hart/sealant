@@ -64,7 +64,7 @@ class Digest(object):
         standard_hash_methods = {
             32: 'md5', 40: 'sha1', 56: 'sha224', 64: 'sha256', 96: 'sha384',
             128: 'sha512'
-            }
+        }
 
         sha3_methods = {
             56: 'sha3_224', 64: 'sha3_256', 96: 'sha3_384', 128: 'sha3_512'
